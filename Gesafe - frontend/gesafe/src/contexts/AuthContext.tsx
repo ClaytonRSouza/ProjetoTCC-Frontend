@@ -10,6 +10,7 @@ interface AuthContextType {
     token: string | null;
     isAuthenticated: boolean;
     isLoading: boolean;
+    userName: string | null;
     signIn: (email: string, password: string) => Promise<void>;
     signOut: () => Promise<void>;
 }
@@ -18,9 +19,9 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [token, setToken] = useState<string | null>(null);
+    const [userName, setUserName] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
-    // Inicializa token salvo
     useEffect(() => {
         const loadToken = async () => {
             try {
@@ -38,7 +39,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         loadToken();
     }, []);
 
-    // Atualiza header se token mudar
     useEffect(() => {
         if (token) {
             api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
@@ -51,26 +51,29 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         try {
             setIsLoading(true);
             const response = await api.post('/auth/login', { email, senha });
+
             const receivedToken = response.data.token;
+            const receivedName = response.data.nome;
 
             if (response.status === 200 && receivedToken) {
                 await saveTokenToSecureStore(receivedToken);
                 setToken(receivedToken);
+                setUserName(receivedName || null);
             } else {
                 throw new Error('Token não encontrado na resposta');
             }
         } catch (error: any) {
             console.error('Erro no login:', error.response ? error.response.data : error.message);
-            throw error;  // Lança o erro para que o componente que chamou a função saiba do problema
+            throw error;
         } finally {
             setIsLoading(false);
         }
     };
 
-
     const signOut = async () => {
         await removeTokenFromSecureStore();
         setToken(null);
+        setUserName(null);
     };
 
     return (
@@ -79,6 +82,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 token,
                 isAuthenticated: !!token,
                 isLoading,
+                userName,
                 signIn,
                 signOut,
             }}

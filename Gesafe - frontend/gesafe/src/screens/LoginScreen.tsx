@@ -48,7 +48,7 @@ export default function LoginScreen({ navigation }: any) {
             />
 
             <Button
-                mode="contained"
+                mode="elevated"
                 onPress={handleLogin}
                 loading={loading}
                 disabled={loading}
@@ -68,5 +68,5 @@ const styles = StyleSheet.create({
     container: { flex: 1, padding: 20, justifyContent: 'center' },
     title: { fontSize: 24, fontWeight: 'bold', marginBottom: 24, textAlign: 'center', color: '#28584B' },
     input: { marginBottom: 16 },
-    button: { marginBottom: 16, backgroundColor: '#C8D7D3', textDecorationColor: '#575757' },
+    button: { marginBottom: 16, backgroundColor: '#C8D7D3', textDecorationColor: '#575757', borderRadius: 10 },
 });

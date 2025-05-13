@@ -12,7 +12,7 @@ export default function InitialPageScreen() {
             <Text style={styles.title}>Bem-vindo ao Gesafe</Text>
 
             <Button
-                mode="contained"
+                mode="elevated"
                 onPress={() => navigation.navigate('Login')}
                 style={styles.button}
             >
@@ -20,7 +20,7 @@ export default function InitialPageScreen() {
             </Button>
 
             <Button
-                mode="outlined"
+                mode="elevated"
                 onPress={() => navigation.navigate('Register')}
                 style={styles.button}
             >
@@ -33,5 +33,5 @@ export default function InitialPageScreen() {
 const styles = StyleSheet.create({
     container: { flex: 1, justifyContent: 'center', padding: 20 },
     title: { fontSize: 24, fontWeight: 'bold', marginBottom: 32, textAlign: 'center', color: '#28584B' },
-    button: { marginBottom: 16, backgroundColor: '#C8D7D3', textDecorationColor: '#575757' },
+    button: { marginBottom: 16, backgroundColor: '#C8D7D3', borderRadius: 10 },
 });

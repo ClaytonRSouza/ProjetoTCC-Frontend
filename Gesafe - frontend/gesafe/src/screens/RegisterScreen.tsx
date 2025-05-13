@@ -66,10 +66,11 @@ export default function RegisterScreen({ navigation }: any) {
       </Button>
 
       <Button
-        mode="contained"
+        mode="elevated"
         onPress={handleCadastro}
         loading={loading}
         disabled={loading}
+        style={styles.button}
       >
         Cadastrar
       </Button>
@@ -82,5 +83,5 @@ const styles = StyleSheet.create({
   title: { fontSize: 24, fontWeight: 'bold', marginBottom: 24, textAlign: 'center' },
   subtitle: { fontSize: 16, fontWeight: 'bold', marginBottom: 8 },
   input: { marginBottom: 16 },
-  button: { marginBottom: 16 },
+  button: { marginBottom: 16, backgroundColor: '#C8D7D3', textDecorationColor: '#575757', borderRadius: 10 },
 });
