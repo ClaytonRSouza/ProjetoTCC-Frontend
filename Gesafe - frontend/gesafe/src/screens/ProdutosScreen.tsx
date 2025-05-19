@@ -1,11 +1,20 @@
+import { useNavigation } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
 import {
-  View, StyleSheet, FlatList, TouchableOpacity, Alert
+  Alert,
+  FlatList,
+  StyleSheet,
+  View,
 } from 'react-native';
-import { Text, Button, Menu, ActivityIndicator, IconButton } from 'react-native-paper';
-import { api } from '../services/api';
+import {
+  ActivityIndicator,
+  Button,
+  Menu,
+  Text,
+} from 'react-native-paper';
+import CustomAppBar from '../components/CustomAppBar';
 import { useAuth } from '../contexts/AuthContext';
-import { useNavigation } from '@react-navigation/native';
+import { api } from '../services/api';
 
 interface Produto {
   idEstoque: number;
@@ -21,14 +30,13 @@ interface Propriedade {
 }
 
 export default function ProdutosScreen() {
-  const { token } = useAuth();
+  const { token, isLoading: authLoading } = useAuth();
   const navigation = useNavigation<any>();
 
   const [propriedades, setPropriedades] = useState<Propriedade[]>([]);
-  const [produtos, setProdutos] = useState<Produto[]>([]);
   const [selectedPropriedade, setSelectedPropriedade] = useState<Propriedade | null>(null);
+  const [produtos, setProdutos] = useState<Produto[]>([]);
   const [loading, setLoading] = useState(true);
-
   const [menuVisible, setMenuVisible] = useState(false);
 
   useEffect(() => {
@@ -43,11 +51,12 @@ export default function ProdutosScreen() {
         console.error('Erro ao buscar propriedades:', err);
       }
     };
+
     fetchPropriedades();
   }, []);
 
   useEffect(() => {
-    if (!selectedPropriedade) return;
+    if (!selectedPropriedade || !token || authLoading) return;
 
     const fetchProdutos = async () => {
       try {
@@ -55,14 +64,14 @@ export default function ProdutosScreen() {
         const res = await api.get(`/produto/${selectedPropriedade.id}`);
         setProdutos(res.data.produtos);
       } catch (err) {
-        console.error('Erro ao buscar produtos:', err);
+        Alert.alert('Erro', 'Erro ao buscar produtos');
       } finally {
         setLoading(false);
       }
     };
 
     fetchProdutos();
-  }, [selectedPropriedade]);
+  }, [selectedPropriedade, token, authLoading]);
 
   const realizarSaida = async (produtoId: number) => {
     Alert.alert('Confirmar', 'Deseja realizar saída deste produto?', [
@@ -71,19 +80,20 @@ export default function ProdutosScreen() {
         text: 'Confirmar',
         onPress: async () => {
           try {
-            const res = await api.post('/produto/saida', {
+            await api.post('/produto/saida', {
               produtoId,
               propriedadeId: selectedPropriedade?.id,
               quantidade: 1,
             });
-            Alert.alert('Sucesso', res.data.message || 'Saída realizada com sucesso');
-            // Atualiza a lista
-            const atualizada = produtos.map(p =>
-              p.idProduto === produtoId
-                ? { ...p, quantidade: Math.max(0, p.quantidade - 1) }
-                : p
+
+            setProdutos((prev) =>
+              prev.map((p) =>
+                p.idProduto === produtoId
+                  ? { ...p, quantidade: Math.max(0, p.quantidade - 1) }
+                  : p
+              )
             );
-            setProdutos(atualizada);
+            Alert.alert('Sucesso', 'Saída registrada com sucesso!');
           } catch (err: any) {
             Alert.alert('Erro', err.response?.data?.error || 'Erro ao registrar saída');
           }
@@ -94,15 +104,24 @@ export default function ProdutosScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <IconButton icon="arrow-left" onPress={() => navigation.goBack()} />
-        <Text style={styles.logo}>GESAFE</Text>
+      <CustomAppBar navigation={navigation} />
+
+      {/* ⬇️ Seletor de propriedade posicionado logo abaixo da AppBar */}
+      <View style={styles.selectorWrapper}>
+        <Button
+          mode="outlined"
+          icon="chevron-down"
+          contentStyle={{ flexDirection: 'row-reverse' }}
+          onPress={() => setMenuVisible(true)}
+          style={styles.selectorButton}
+        >
+          {selectedPropriedade?.nome || 'Selecionar propriedade'}
+        </Button>
+
         <Menu
           visible={menuVisible}
           onDismiss={() => setMenuVisible(false)}
-          anchor={
-            <IconButton icon="menu" onPress={() => setMenuVisible(true)} />
-          }
+          anchor={{ x: 0, y: 0 }}
         >
           {propriedades.map((p) => (
             <Menu.Item
@@ -121,7 +140,9 @@ export default function ProdutosScreen() {
         mode="elevated"
         icon="plus"
         style={styles.addButton}
-        onPress={() => navigation.navigate('CadastrarProduto')}
+        onPress={() => navigation.navigate('CadastrarProduto', {
+          propriedadeSelecionada: selectedPropriedade,
+        })}
       >
         Adicionar novo produto
       </Button>
@@ -162,16 +183,15 @@ export default function ProdutosScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 12, backgroundColor: '#f5f5f5' },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  container: { flex: 1, backgroundColor: '#f5f5f5', padding: 12 },
+  selectorWrapper: {
+    marginTop: 12,
+    marginBottom: 8,
   },
-  logo: {
-    fontWeight: 'bold',
-    fontSize: 20,
-    textAlign: 'center',
+  selectorButton: {
+    borderRadius: 6,
+    borderColor: '#144734',
+    width: '100%',
   },
   addButton: {
     marginVertical: 16,

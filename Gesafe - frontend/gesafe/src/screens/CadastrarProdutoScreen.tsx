@@ -1,6 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { View, ScrollView, StyleSheet, Alert } from 'react-native';
-import { Text, TextInput, Button, Menu, Provider as PaperProvider } from 'react-native-paper';
+import {
+  Alert,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import {
+  Button,
+  IconButton,
+  Menu,
+  Text,
+  TextInput,
+} from 'react-native-paper';
+import CustomAppBar from '../components/CustomAppBar';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
 
@@ -22,7 +35,7 @@ export default function CadastrarProdutoScreen({ navigation }: any) {
     'SACARIA', 'BAG_1TN', 'BAG_750KG', 'LITRO', 'GALAO_2L', 'GALAO_5L',
     'GALAO_10L', 'BALDE_20L', 'TAMBOR_200L', 'IBC_1000L',
     'PACOTE_1KG', 'PACOTE_5KG', 'PACOTE_10KG', 'PACOTE_15KG',
-    'PACOTE_500G', 'OUTROS'
+    'PACOTE_500G', 'OUTROS',
   ];
 
   useEffect(() => {
@@ -30,25 +43,37 @@ export default function CadastrarProdutoScreen({ navigation }: any) {
       try {
         const response = await api.get('/auth/propriedades');
         setPropriedades(response.data.propriedades);
+        if (response.data.propriedades.length > 0) {
+          setPropriedadeId(response.data.propriedades[0].id);
+        }
       } catch (error) {
-        console.error('Erro ao carregar propriedades', error);
+        Alert.alert('Erro', 'Erro ao carregar propriedades.');
       }
     };
     fetchPropriedades();
   }, []);
 
   const handleCadastrar = async () => {
-    if (!nome || !quantidade || !validade || !embalagem || !propriedadeId) {
-      Alert.alert('Erro', 'Preencha todos os campos!');
+    const quantidadeNum = parseInt(quantidade);
+
+    if (
+      !nome.trim() ||
+      isNaN(quantidadeNum) ||
+      quantidadeNum <= 0 ||
+      !validade.trim() ||
+      !embalagem ||
+      !propriedadeId
+    ) {
+      Alert.alert('Erro', 'Preencha todos os campos corretamente!');
       return;
     }
 
     const payload = {
       nome,
-      quantidade: parseInt(quantidade),
+      quantidade: quantidadeNum,
       validade,
       embalagem,
-      propriedadeId
+      propriedadeId,
     };
 
     try {
@@ -56,22 +81,20 @@ export default function CadastrarProdutoScreen({ navigation }: any) {
       await api.post('/produto/cadastrar', payload);
       Alert.alert('Sucesso', 'Produto cadastrado com sucesso!');
       navigation.goBack();
-    } catch (error) {
-      console.error('Erro ao cadastrar produto:', error);
-      Alert.alert('Erro', 'Não foi possível cadastrar o produto.');
+    } catch (error: any) {
+      Alert.alert('Erro', error.response?.data?.error || 'Erro ao cadastrar o produto.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <PaperProvider>
-      <ScrollView style={styles.container}>
+    <View style={styles.container}>
+      <CustomAppBar navigation={navigation} />
 
-        <Text style={styles.title}>Cadastro de produtos</Text>
-
+      <ScrollView contentContainerStyle={styles.form}>
         <TextInput
-          label="Descrição"
+          label="Nome do Produto"
           mode="outlined"
           value={nome}
           onChangeText={setNome}
@@ -95,63 +118,69 @@ export default function CadastrarProdutoScreen({ navigation }: any) {
           style={styles.input}
         />
 
-        <Menu
-          visible={embalagemMenuVisible}
-          onDismiss={() => setEmbalagemMenuVisible(false)}
-          anchor={
-            <TextInput
-              label="Embalagem"
-              mode="outlined"
-              value={embalagem.replace(/_/g, ' ')}
-              onFocus={() => setEmbalagemMenuVisible(true)}
-              style={styles.input}
-              editable={false}
-              right={<TextInput.Icon icon="menu-down" />}
-            />
-          }
-        >
-          {embalagens.map((item) => (
-            <Menu.Item
-              key={item}
-              onPress={() => {
-                setEmbalagem(item);
-                setEmbalagemMenuVisible(false);
-              }}
-              title={item.replace(/_/g, ' ')}
-            />
-          ))}
-        </Menu>
+        {/* ⬇️ Embalagem */}
+        <View style={styles.dropdown}>
+          <Text style={styles.dropdownLabel}>Embalagem</Text>
+          <Menu
+            visible={embalagemMenuVisible}
+            onDismiss={() => setEmbalagemMenuVisible(false)}
+            anchor={
+              <TouchableOpacity
+                onPress={() => setEmbalagemMenuVisible(true)}
+                style={styles.dropdownAnchor}
+              >
+                <Text style={styles.dropdownText}>
+                  {embalagem ? embalagem.replace(/_/g, ' ') : 'Selecionar...'}
+                </Text>
+                <IconButton icon="menu-down" size={20} />
+              </TouchableOpacity>
+            }
+          >
+            {embalagens.map((item) => (
+              <Menu.Item
+                key={item}
+                onPress={() => {
+                  setEmbalagem(item);
+                  setEmbalagemMenuVisible(false);
+                }}
+                title={item.replace(/_/g, ' ')}
+              />
+            ))}
+          </Menu>
+        </View>
 
-        <Menu
-          visible={propriedadeMenuVisible}
-          onDismiss={() => setPropriedadeMenuVisible(false)}
-          anchor={
-            <TextInput
-              label="Propriedade"
-              mode="outlined"
-              value={
-                propriedadeId
-                  ? propriedades.find((p) => p.id === propriedadeId)?.nome || ''
-                  : ''
-              }
-              onFocus={() => setPropriedadeMenuVisible(true)}
-              style={styles.input}
-              editable={false}
-              right={<TextInput.Icon icon="menu-down" />}
-            />
-          }
-        >
-          {propriedades.map((item) => (
-            <Menu.Item
-              key={item.id}
-              onPress={() => {
-                setPropriedadeId(item.id);
-                setPropriedadeMenuVisible(false);
-              }}
-              title={item.nome}
-            />
-          ))}
-        </Menu>
+        {/* ⬇️ Propriedade */}
+        <View style={styles.dropdown}>
+          <Text style={styles.dropdownLabel}>Propriedade</Text>
+          <Menu
+            visible={propriedadeMenuVisible}
+            onDismiss={() => setPropriedadeMenuVisible(false)}
+            anchor={
+              <TouchableOpacity
+                onPress={() => setPropriedadeMenuVisible(true)}
+                style={styles.dropdownAnchor}
+              >
+                <Text style={styles.dropdownText}>
+                  {propriedadeId
+                    ? propriedades.find((p) => p.id === propriedadeId)?.nome
+                    : 'Selecionar...'}
+                </Text>
+                <IconButton icon="menu-down" size={20} />
+              </TouchableOpacity>
+            }
+          >
+            {propriedades.map((item) => (
+              <Menu.Item
+                key={item.id}
+                onPress={() => {
+                  setPropriedadeId(item.id);
+                  setPropriedadeMenuVisible(false);
+                }}
+                title={item.nome}
+              />
+            ))}
+          </Menu>
+        </View>
 
         <Button
           mode="contained"
@@ -160,28 +189,40 @@ export default function CadastrarProdutoScreen({ navigation }: any) {
           disabled={loading}
           style={styles.button}
         >
-          {loading ? 'Cadastrando...' : 'Cadastrar'}
+          {loading ? 'Cadastrando...' : 'Cadastrar Produto'}
         </Button>
       </ScrollView>
-    </PaperProvider>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: '#f5f5f5' },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 20
+  container: { flex: 1, backgroundColor: '#f5f5f5' },
+  form: { padding: 20, paddingBottom: 50 },
+  input: { marginBottom: 16, backgroundColor: '#fff' },
+  dropdown: { marginBottom: 16 },
+  dropdownLabel: {
+    marginBottom: 4,
+    fontSize: 14,
+    color: '#555',
   },
-  input: {
-    marginBottom: 16,
-    backgroundColor: '#fff'
+  dropdownAnchor: {
+    backgroundColor: '#fff',
+    padding: 14,
+    borderRadius: 4,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  dropdownText: {
+    fontSize: 16,
+    color: '#333',
   },
   button: {
-    marginTop: 10,
+    marginTop: 20,
+    borderRadius: 10,
     backgroundColor: '#c9e3dc',
-    borderRadius: 10
-  }
+  },
 });

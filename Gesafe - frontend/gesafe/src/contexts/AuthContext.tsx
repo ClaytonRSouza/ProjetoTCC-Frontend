@@ -22,48 +22,56 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [userName, setUserName] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
+    // Carrega token do armazenamento seguro ao iniciar o app
     useEffect(() => {
-        const loadToken = async () => {
+        const initializeAuth = async () => {
             try {
                 const storedToken = await getTokenFromSecureStore();
+                console.log('Token recuperado do SecureStore:', storedToken);
+
                 if (storedToken) {
                     setToken(storedToken);
                     api.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
                 }
             } catch (error) {
-                console.error('Erro ao carregar token:', error);
+                console.error('Erro ao carregar token do SecureStore:', error);
             } finally {
                 setIsLoading(false);
             }
         };
-        loadToken();
+
+        initializeAuth();
     }, []);
 
+    // Toda vez que o token mudar, atualiza o header do Axios
     useEffect(() => {
         if (token) {
             api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+            console.log('Header Authorization setado com token.');
         } else {
             delete api.defaults.headers.common['Authorization'];
+            console.log('Token removido do header.');
         }
     }, [token]);
 
     const signIn = async (email: string, senha: string) => {
+        setIsLoading(true);
         try {
-            setIsLoading(true);
             const response = await api.post('/auth/login', { email, senha });
 
             const receivedToken = response.data.token;
             const receivedName = response.data.nome;
 
-            if (response.status === 200 && receivedToken) {
-                await saveTokenToSecureStore(receivedToken);
-                setToken(receivedToken);
-                setUserName(receivedName || null);
-            } else {
-                throw new Error('Token não encontrado na resposta');
-            }
+            if (!receivedToken) throw new Error('Token ausente da resposta');
+
+            await saveTokenToSecureStore(receivedToken);
+            setToken(receivedToken);
+            setUserName(receivedName || null);
+
+            console.log('Login realizado com sucesso. Token salvo.');
+
         } catch (error: any) {
-            console.error('Erro no login:', error.response ? error.response.data : error.message);
+            console.error('Erro no login:', error?.response?.data || error.message);
             throw error;
         } finally {
             setIsLoading(false);
@@ -71,9 +79,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     const signOut = async () => {
-        await removeTokenFromSecureStore();
-        setToken(null);
-        setUserName(null);
+        try {
+            await removeTokenFromSecureStore();
+            setToken(null);
+            setUserName(null);
+            console.log('Token removido. Usuário deslogado.');
+        } catch (error) {
+            console.error('Erro ao sair:', error);
+        }
     };
 
     return (
