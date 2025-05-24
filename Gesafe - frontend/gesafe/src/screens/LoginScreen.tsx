@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
+import { Alert, Image, StyleSheet, View } from 'react-native';
 import { Button, Text, TextInput } from 'react-native-paper';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -29,6 +29,7 @@ export default function LoginScreen({ navigation }: any) {
 
     return (
         <View style={styles.container}>
+            <Image source={require('../assets/logoApp.png')} style={styles.logo} />
             <Text style={styles.title}>Entrar no Gesafe</Text>
 
             <TextInput
@@ -49,9 +50,11 @@ export default function LoginScreen({ navigation }: any) {
 
             <Button
                 mode="elevated"
+                icon='login'
                 onPress={handleLogin}
                 loading={loading}
                 disabled={loading}
+                labelStyle={{ color: '#575757', fontWeight: '500', fontSize: 20 }}
                 style={styles.button}
             >
                 Entrar
@@ -67,6 +70,7 @@ export default function LoginScreen({ navigation }: any) {
 const styles = StyleSheet.create({
     container: { flex: 1, padding: 20, justifyContent: 'center' },
     title: { fontSize: 24, fontWeight: 'bold', marginBottom: 24, textAlign: 'center', color: '#28584B' },
-    input: { marginBottom: 16 },
-    button: { marginBottom: 16, backgroundColor: '#C8D7D3', textDecorationColor: '#575757', borderRadius: 10 },
+    input: { marginBottom: 16, backgroundColor: '#f0f0f0', borderColor: '#575757', borderWidth: 1 },
+    button: { marginBottom: 16, backgroundColor: '#c8d7d3', borderRadius: 10 },
+    logo: { width: 180, height: 160, alignSelf: 'center', marginTop: 10, marginBottom: 70 },
 });

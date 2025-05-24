@@ -97,7 +97,7 @@ export default function CadastrarProdutoScreen({ navigation }: any) {
           label="Nome do Produto"
           mode="outlined"
           value={nome}
-          onChangeText={setNome}
+          onChangeText={(text) => setNome(text.toUpperCase())}
           style={styles.input}
         />
 
@@ -118,7 +118,6 @@ export default function CadastrarProdutoScreen({ navigation }: any) {
           style={styles.input}
         />
 
-        {/* ⬇️ Embalagem */}
         <View style={styles.dropdown}>
           <Text style={styles.dropdownLabel}>Embalagem</Text>
           <Menu
@@ -183,10 +182,12 @@ export default function CadastrarProdutoScreen({ navigation }: any) {
         </View>
 
         <Button
-          mode="contained"
+          mode="elevated"
+          icon='content-save-outline'
           onPress={handleCadastrar}
           loading={loading}
           disabled={loading}
+          labelStyle={{ color: '#575757', fontWeight: '500', fontSize: 20 }}
           style={styles.button}
         >
           {loading ? 'Cadastrando...' : 'Cadastrar Produto'}
@@ -197,8 +198,8 @@ export default function CadastrarProdutoScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f5f5' },
-  form: { padding: 20, paddingBottom: 50 },
+  container: { flex: 1, backgroundColor: '#f5f5f5', padding: 12 },
+  form: { padding: 10, paddingBottom: 50 },
   input: { marginBottom: 16, backgroundColor: '#fff' },
   dropdown: { marginBottom: 16 },
   dropdownLabel: {
@@ -221,8 +222,8 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   button: {
-    marginTop: 20,
+    marginVertical: 16,
     borderRadius: 10,
-    backgroundColor: '#c9e3dc',
+    backgroundColor: '#c8d7d3'
   },
 });

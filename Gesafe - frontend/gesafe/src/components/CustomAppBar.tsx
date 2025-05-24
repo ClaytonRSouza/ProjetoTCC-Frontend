@@ -1,6 +1,5 @@
-// src/components/CustomAppBar.tsx
 import React from 'react';
-import { Image, StyleSheet, TouchableOpacity } from 'react-native';
+import { Image, SafeAreaView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Appbar } from 'react-native-paper';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -12,26 +11,32 @@ export default function CustomAppBar({ navigation }: Props) {
     const { signOut } = useAuth();
 
     return (
-        <Appbar.Header style={styles.appBar}>
-            <TouchableOpacity onPress={() => navigation.goBack()}>
-                <Appbar.BackAction />
-            </TouchableOpacity>
+        <SafeAreaView style={{ backgroundColor: 'white' }}>
+            <View style={styles.appBar}>
+                <TouchableOpacity onPress={() => navigation.goBack()}>
+                    <Appbar.BackAction />
+                </TouchableOpacity>
 
-            <Image
-                source={require('../assets/logoBarra.png')}
-                style={styles.logo}
-                resizeMode="contain"
-            />
+                <Image
+                    source={require('../assets/logoBarra.png')}
+                    style={styles.logo}
+                    resizeMode="contain"
+                />
 
-            <Appbar.Action icon="logout" onPress={signOut} />
-        </Appbar.Header>
+                <Appbar.Action icon="logout" onPress={signOut} />
+            </View>
+        </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
     appBar: {
-        backgroundColor: 'white',
+        flexDirection: 'row',
+        alignItems: 'center',
         justifyContent: 'space-between',
+        paddingHorizontal: 8,
+        paddingVertical: 18,
+        backgroundColor: '#f5f5f5',
     },
     logo: {
         height: 40,

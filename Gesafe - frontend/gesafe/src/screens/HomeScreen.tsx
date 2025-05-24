@@ -11,7 +11,7 @@ export default function HomeScreen() {
     return (
         <View style={styles.container}>
             <Appbar.Header style={styles.appBar}>
-                <TouchableOpacity onPress={() => navigation.goBack()}>
+                <TouchableOpacity onPress={signOut}>
                     <Appbar.BackAction />
                 </TouchableOpacity>
 
@@ -56,6 +56,14 @@ export default function HomeScreen() {
                         <Text style={styles.optionText}>Relatórios</Text>
                     </Card.Content>
                 </Card>
+
+                <Card style={styles.optionCard} onPress={() => navigation.navigate('CadastrarPropriedade')}>
+                    <Card.Content style={styles.cardContent}>
+                        <Image source={require('../assets/ic_propriedade.png')} style={styles.icon} />
+                        <Text style={styles.optionText}>Propriedades</Text>
+                    </Card.Content>
+                </Card>
+
             </View>
         </View>
     );
@@ -63,7 +71,7 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#F5F5F5' },
-    appBar: { backgroundColor: 'white', justifyContent: 'space-between' },
+    appBar: { backgroundColor: '#f5f5f5', justifyContent: 'space-between' },
     logo: { height: 40, width: 100, alignSelf: 'center' },
     greeting: {
         fontSize: 24,
@@ -76,6 +84,8 @@ const styles = StyleSheet.create({
         flexWrap: 'wrap',
         justifyContent: 'space-around',
         paddingHorizontal: 10,
+        gap: 10,
+        marginTop: 10
     },
     optionCard: {
         backgroundColor: '#E0E0E0',
@@ -86,6 +96,6 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     cardContent: { alignItems: 'center', justifyContent: 'center' },
-    icon: { width: 40, height: 40, marginBottom: 8 },
-    optionText: { fontSize: 16, color: '#144734', fontWeight: '500' },
+    icon: { width: 45, height: 45, marginBottom: 8, marginTop: 8, resizeMode: 'contain' },
+    optionText: { fontSize: 16, color: '#144734', fontWeight: 'semibold' },
 });

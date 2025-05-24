@@ -61,15 +61,23 @@ export default function RegisterScreen({ navigation }: any) {
         />
       ))}
 
-      <Button mode="outlined" onPress={adicionarPropriedade} style={styles.button}>
-        + Adicionar Propriedade
+      <Button
+        mode="outlined"
+        icon='plus-circle-outline'
+        onPress={adicionarPropriedade}
+        labelStyle={{ color: '#575757', fontWeight: '500', fontSize: 20 }}
+        style={styles.button}
+      >
+        Adicionar Propriedade
       </Button>
 
       <Button
         mode="elevated"
+        icon='content-save-outline'
         onPress={handleCadastro}
         loading={loading}
         disabled={loading}
+        labelStyle={{ color: '#575757', fontWeight: '500', fontSize: 20 }}
         style={styles.button}
       >
         Cadastrar
@@ -82,6 +90,6 @@ const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, justifyContent: 'center' },
   title: { fontSize: 24, fontWeight: 'bold', marginBottom: 24, textAlign: 'center' },
   subtitle: { fontSize: 16, fontWeight: 'bold', marginBottom: 8 },
-  input: { marginBottom: 16 },
-  button: { marginBottom: 16, backgroundColor: '#C8D7D3', textDecorationColor: '#575757', borderRadius: 10 },
+  input: { marginBottom: 16, backgroundColor: '#f0f0f0', borderColor: '#575757', borderWidth: 1 },
+  button: { marginBottom: 16, backgroundColor: '#c8d7d3', borderRadius: 10 },
 });
