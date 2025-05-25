@@ -212,7 +212,7 @@ export default function ProdutosScreen() {
             <View style={styles.itemContainer}>
               <View style={styles.itemInfo}>
                 <Text style={styles.itemLabel}>Produto</Text>
-                <Text>{item.nome}</Text>
+                <Text>{item.nome.toUpperCase()} {item.embalagem.replace(/_/g, ' ')}</Text>
                 <Text style={styles.itemLabel}>Vencimento</Text>
                 <Text>{item.validade}</Text>
                 <Text style={styles.itemLabel}>Quantidade</Text>

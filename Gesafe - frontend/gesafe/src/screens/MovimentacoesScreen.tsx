@@ -98,20 +98,21 @@ export default function MovimentacoesScreen({ navigation }: any) {
             <CustomAppBar navigation={navigation} />
 
             <View style={styles.selectorWrapper}>
-                <Button
-                    mode="outlined"
-                    icon="chevron-down"
-                    onPress={() => setMenuVisible(true)}
-                    labelStyle={{ color: '#575757', fontWeight: 'bold', fontSize: 18 }}
-                    style={styles.selectorButton}
-                >
-                    {selectedPropriedade?.nome || 'Selecionar propriedade'}
-                </Button>
-
                 <Menu
                     visible={menuVisible}
                     onDismiss={() => setMenuVisible(false)}
-                    anchor={{ x: 0, y: 0 }}
+                    anchor={
+                        <Button
+                            mode="outlined"
+                            icon="chevron-down"
+                            contentStyle={{ flexDirection: 'row-reverse' }}
+                            onPress={() => setMenuVisible(true)}
+                            labelStyle={{ color: '#575757', fontWeight: 'bold', fontSize: 18 }}
+                            style={styles.selectorButton}
+                        >
+                            {selectedPropriedade?.nome || 'Selecionar propriedade'}
+                        </Button>
+                    }
                 >
                     {propriedades.map((p) => (
                         <Menu.Item
@@ -135,7 +136,7 @@ export default function MovimentacoesScreen({ navigation }: any) {
                     renderItem={({ item }) => (
                         <Card style={styles.item}>
                             <Card.Title
-                                title={`${item.produtoNome}  (${item.embalagem})`}
+                                title={`${item.produtoNome.toUpperCase()}  ${item.embalagem.replace(/_/g, ' ')}`}
                                 subtitle={`Data: ${item.data} - Qtd: ${item.quantidade}`}
                                 left={(props) => (
                                     <IconButton

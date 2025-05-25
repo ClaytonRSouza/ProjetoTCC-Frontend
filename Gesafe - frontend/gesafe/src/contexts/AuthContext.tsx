@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { Alert } from 'react-native';
 import { api } from '../services/api';
 import {
     getTokenFromSecureStore,
@@ -67,6 +68,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             await saveTokenToSecureStore(receivedToken);
             setToken(receivedToken);
             setUserName(receivedName || null);
+            await verificarProdutosAVencer();
 
             console.log('Login realizado com sucesso. Token salvo.');
 
@@ -75,6 +77,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             throw error;
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const verificarProdutosAVencer = async () => {
+        try {
+            const res = await api.get('/produto/alertas-vencimento');
+            const vencidos = res.data.produtos.filter((p: any) => p.vencido).length;
+            const proximos = res.data.produtos.length - vencidos;
+
+            if (res.data.produtos.length > 0) {
+                Alert.alert(
+                    'Atenção!',
+                    `Você possui ${proximos} produto(s) próximo(s) do vencimento e ${vencidos} vencido(s).`
+                );
+            }
+        } catch (err) {
+            console.error('Erro ao verificar produtos a vencer:', err);
         }
     };
 

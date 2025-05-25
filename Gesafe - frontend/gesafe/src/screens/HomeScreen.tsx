@@ -43,7 +43,7 @@ export default function HomeScreen() {
                     </Card.Content>
                 </Card>
 
-                <Card style={styles.optionCard} onPress={() => navigation.navigate('Vencimentos')}>
+                <Card style={styles.optionCard} onPress={() => navigation.navigate('ProdutosVencimento')}>
                     <Card.Content style={styles.cardContent}>
                         <Image source={require('../assets/ic_vencimentos.png')} style={styles.icon} />
                         <Text style={styles.optionText}>Vencimentos</Text>
