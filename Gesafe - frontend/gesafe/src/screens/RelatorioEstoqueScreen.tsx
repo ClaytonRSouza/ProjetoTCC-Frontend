@@ -2,63 +2,54 @@ import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import React, { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
-import { ActivityIndicator, Button, Text } from 'react-native-paper';
+import { Button, Menu, Text } from 'react-native-paper';
 import CustomAppBar from '../components/CustomAppBar';
-import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
 
-interface ProdutoRelatorio {
-    nome: string;
-    quantidade: number;
-    validade: string;
-    embalagem: string;
-}
+interface Produto { nome: string; quantidade: number; validade: string; embalagem: string; }
+interface Propriedade { id: number; nome: string; }
 
 export default function RelatorioEstoqueScreen({ navigation }: any) {
-    const { token } = useAuth();
+    const [relatorio, setRelatorio] = useState<Record<string, Produto[]>>({});
+    const [propriedades, setPropriedades] = useState<Propriedade[]>([]);
+    const [selectedPropriedade, setSelectedPropriedade] = useState<Propriedade | null>(null);
+    const [menuVisible, setMenuVisible] = useState(false);
 
-    const [relatorio, setRelatorio] = useState<Record<string, ProdutoRelatorio[]>>({});
-    const [loading, setLoading] = useState(false);
+    const embalagens = [
+        'SACARIA', 'BAG_1TN', 'BAG_750KG', 'LITRO', 'GALAO_2L', 'GALAO_5L',
+        'GALAO_10L', 'BALDE_20L', 'TAMBOR_200L', 'IBC_1000L',
+        'PACOTE_1KG', 'PACOTE_5KG', 'PACOTE_10KG', 'PACOTE_15KG',
+        'PACOTE_500G', 'OUTROS'
+    ];
+    const [selectedEmbalagem, setSelectedEmbalagem] = useState<string | null>(null);
+    const [menuEmbalagemVisible, setMenuEmbalagemVisible] = useState(false);
 
-    useEffect(() => {
-        fetchRelatorio();
-    }, []);
+    useEffect(() => { fetchPropriedades(); fetchRelatorio(); }, []);
+    useEffect(() => { fetchRelatorio(); }, [selectedPropriedade]);
+
+    const fetchPropriedades = async () => {
+        const res = await api.get('/auth/propriedades');
+        setPropriedades(res.data.propriedades);
+    };
 
     const fetchRelatorio = async () => {
-        try {
-            setLoading(true);
-            const res = await api.get('/produto/relatorio-geral');
-            setRelatorio(res.data.relatorio);
-        } catch (error) {
-            console.error('Erro ao buscar relatório:', error);
-        } finally {
-            setLoading(false);
-        }
+        const params: any = {};
+        if (selectedPropriedade) params.propriedadeId = selectedPropriedade.id;
+        const res = await api.get('/produto/relatorio-geral', { params });
+        setRelatorio(res.data.relatorio);
     };
 
     const gerarPDF = async () => {
         const html = `
-      <html>
-        <head>
-          <style>
-            body { font-family: Arial; padding: 20px; }
-            h1 { color: #144734; }
-            h2 { margin-top: 20px; }
-            p { margin-left: 10px; }
-          </style>
-        </head>
-        <body>
-          <h1>Relatório de Estoque</h1>
-          ${Object.entries(relatorio).map(([prop, produtos]) => `
-            <h2>${prop}</h2>
-            ${produtos.map(p => `
-              <p>${p.nome} - ${p.quantidade} un - ${p.embalagem.replace(/_/g, ' ')} - Venc: ${p.validade || 'Sem validade'}</p>
-            `).join('')}
-          `).join('')}
-        </body>
-      </html>
+      <html><body>
+      <h1>Relatório de Estoque</h1>
+      ${Object.entries(relatorio).map(([prop, produtos]) => `
+        <h2>${prop}</h2>
+        ${produtos.filter(p => !selectedEmbalagem || p.embalagem === selectedEmbalagem)
+                .map(p => `<p>${p.nome} - ${p.quantidade} un - Venc: ${p.validade}</p>`).join('')}
+      `).join('')}
+      </body></html>
     `;
-
         const { uri } = await Print.printToFileAsync({ html });
         await Sharing.shareAsync(uri);
     };
@@ -68,35 +59,42 @@ export default function RelatorioEstoqueScreen({ navigation }: any) {
             <CustomAppBar navigation={navigation} />
             <Text style={styles.title}>Relatório de Estoque</Text>
 
-            {loading ? (
-                <ActivityIndicator animating style={styles.loader} />
-            ) : (
-                <ScrollView>
-                    {Object.entries(relatorio).map(([propriedade, produtos]) => (
-                        <View key={propriedade} style={styles.propContainer}>
-                            <Text style={styles.propTitle}>{propriedade}</Text>
-                            {produtos.map((p, idx) => (
-                                <Text key={idx}>
-                                    {p.nome} - {p.quantidade} un - {p.embalagem.replace(/_/g, ' ')} - Venc: {p.validade || 'Sem validade'}
-                                </Text>
-                            ))}
-                        </View>
-                    ))}
-                </ScrollView>
-            )}
+            <Button onPress={() => setMenuVisible(true)}>{selectedPropriedade?.nome || 'Selecionar Propriedade'}</Button>
+            <Menu visible={menuVisible} onDismiss={() => setMenuVisible(false)} anchor={{ x: 0, y: 0 }}>
+                {propriedades.map((p) => (
+                    <Menu.Item key={p.id} onPress={() => { setSelectedPropriedade(p); setMenuVisible(false); }} title={p.nome} />
+                ))}
+                <Menu.Item onPress={() => { setSelectedPropriedade(null); setMenuVisible(false); }} title="Todas" />
+            </Menu>
 
-            <Button mode="contained" style={styles.button} onPress={gerarPDF}>
-                Gerar PDF
-            </Button>
+            <Button onPress={() => setMenuEmbalagemVisible(true)}>{selectedEmbalagem || 'Selecionar Embalagem'}</Button>
+            <Menu visible={menuEmbalagemVisible} onDismiss={() => setMenuEmbalagemVisible(false)} anchor={{ x: 0, y: 0 }}>
+                {embalagens.map((e) => (
+                    <Menu.Item key={e} onPress={() => { setSelectedEmbalagem(e); setMenuEmbalagemVisible(false); }} title={e} />
+                ))}
+                <Menu.Item onPress={() => { setSelectedEmbalagem(null); setMenuEmbalagemVisible(false); }} title="Todas" />
+            </Menu>
+
+            <ScrollView>
+                {Object.entries(relatorio).map(([prop, produtos]) => (
+                    <View key={prop}>
+                        <Text style={styles.propTitle}>{prop}</Text>
+                        {produtos.filter(p => !selectedEmbalagem || p.embalagem === selectedEmbalagem)
+                            .map((p, i) => (
+                                <Text key={i}>{p.nome} - {p.embalagem.replace(/_/g, ' ')} - {p.quantidade} un - Venc: {p.validade}</Text>
+                            ))}
+                    </View>
+                ))}
+            </ScrollView>
+
+            <Button onPress={gerarPDF} style={styles.button}>Gerar PDF</Button>
         </View>
     );
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, padding: 12, backgroundColor: '#f5f5f5' },
-    title: { fontSize: 20, fontWeight: 'bold', marginBottom: 10 },
-    loader: { flex: 1, justifyContent: 'center' },
-    propContainer: { marginBottom: 12 },
-    propTitle: { fontSize: 16, fontWeight: 'bold', color: '#144734' },
-    button: { marginTop: 16, backgroundColor: '#144734' },
+    container: { flex: 1, padding: 12 },
+    title: { fontSize: 18, fontWeight: 'bold' },
+    propTitle: { marginTop: 12, fontWeight: 'bold' },
+    button: { marginTop: 16 }
 });

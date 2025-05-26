@@ -9,7 +9,7 @@ import ProdutosVencimentoScreen from '../screens/ProdutosVencimentoScreen';
 import RelatorioEstoqueScreen from '../screens/RelatorioEstoqueScreen';
 import RelatorioMovimentacoesScreen from '../screens/RelatorioMovimentacoesScreen';
 import RelatoriosScreen from '../screens/RelatoriosScreen';
-import RelatorioVencimentosScreen from '../screens/relatorioVencimentosScreen';
+import RelatorioVencimentosScreen from '../screens/RelatorioVencimentosScreen';
 
 const Stack = createNativeStackNavigator();
 
