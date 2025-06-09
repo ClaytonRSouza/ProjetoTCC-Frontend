@@ -72,6 +72,7 @@ export default function EditarPerfilScreen({ navigation }: any) {
 
             <Button
                 mode="contained"
+                labelStyle={{ color: '#000', fontWeight: '500', fontSize: 18 }}
                 onPress={handleSalvar}
                 loading={loading}
                 disabled={loading}
@@ -87,5 +88,5 @@ const styles = StyleSheet.create({
     container: { flex: 1, padding: 20, backgroundColor: '#f5f5f5' },
     title: { fontSize: 24, fontWeight: 'bold', marginBottom: 20, textAlign: 'center' },
     input: { marginBottom: 16, backgroundColor: '#fff' },
-    button: { marginTop: 16, backgroundColor: '#144734' },
+    button: { marginVertical: 16, borderRadius: 10, backgroundColor: '#c8d7d3' },
 });

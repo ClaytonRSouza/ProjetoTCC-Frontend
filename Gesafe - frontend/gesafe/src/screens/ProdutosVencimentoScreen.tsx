@@ -49,7 +49,7 @@ export default function ProdutosVencimentoScreen({ navigation }: any) {
                     renderItem={({ item }) => (
                         <Card style={styles.card}>
                             <Card.Content>
-                                <Text style={styles.produtoNome}>{item.nome.toUpperCase()} {item.embalagem.replace(/_/g, ' ')}</Text>
+                                <Text style={styles.produtoNome}>{item.nome.toUpperCase()} - {item.embalagem.replace(/_/g, ' ')}</Text>
                                 <Text
                                     style={[
                                         styles.validade,

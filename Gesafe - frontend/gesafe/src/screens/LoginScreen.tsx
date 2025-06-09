@@ -73,7 +73,7 @@ export default function LoginScreen({ navigation }: any) {
                 onPress={handleLogin}
                 loading={loading}
                 disabled={loading}
-                labelStyle={{ color: '#575757', fontWeight: '500', fontSize: 20 }}
+                labelStyle={{ color: '#000', fontWeight: '500', fontSize: 20 }}
                 style={styles.button}
             >
                 Entrar
@@ -108,13 +108,13 @@ export default function LoginScreen({ navigation }: any) {
                         <Button
                             mode="contained"
                             style={styles.button}
-                            labelStyle={{ color: '#575757', fontWeight: '500', fontSize: 20 }}
+                            labelStyle={{ color: '#000', fontWeight: '500', fontSize: 18 }}
                             onPress={solicitarResetSenha}
                         >
                             Enviar
                         </Button>
                         <Button
-                            labelStyle={{ color: '#575757', fontWeight: '500', fontSize: 18 }}
+                            labelStyle={{ color: '#000', fontWeight: '500', fontSize: 18 }}
                             onPress={() => setModalVisible(false)}
                         >
                             Cancelar
@@ -130,8 +130,8 @@ const styles = StyleSheet.create({
     container: { flex: 1, padding: 20, justifyContent: 'center' },
     title: { fontSize: 24, fontWeight: 'bold', marginBottom: 24, textAlign: 'center', color: '#28584B' },
     input: { marginBottom: 16, backgroundColor: '#f0f0f0', borderColor: '#575757', borderWidth: 1 },
-    button: { marginBottom: 16, backgroundColor: '#c8d7d3', borderRadius: 10 },
-    logo: { width: 180, height: 160, alignSelf: 'center', marginTop: 10, marginBottom: 70 },
+    button: { marginVertical: 16, borderRadius: 10, backgroundColor: '#c8d7d3' },
+    logo: { width: 200, height: 180, alignSelf: 'center', marginTop: 10, marginBottom: 70 },
     modalContainer: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' },
     modalContent: { backgroundColor: '#fff', padding: 20, borderRadius: 10, width: '80%' },
     modalInput: { marginBottom: 16, backgroundColor: '#f0f0f0', borderColor: '#575757', borderWidth: 1, marginTop: 8 }

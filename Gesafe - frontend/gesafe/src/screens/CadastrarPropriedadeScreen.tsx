@@ -47,7 +47,7 @@ export default function CadastrarPropriedadeScreen() {
                     onPress={handleCadastrar}
                     loading={loading}
                     disabled={loading}
-                    labelStyle={{ color: '#575757', fontWeight: '500', fontSize: 20 }}
+                    labelStyle={{ color: '#000', fontWeight: '500', fontSize: 20 }}
                     style={styles.button}
                 >
                     {loading ? 'Cadastrando...' : 'Cadastrar'}
