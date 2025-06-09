@@ -36,6 +36,10 @@ export default function ProdutosScreen() {
   const [loading, setLoading] = useState(true);
   const [menuVisible, setMenuVisible] = useState(false);
 
+  const [saidaModalVisible, setSaidaModalVisible] = useState(false);
+  const [produtoSaida, setProdutoSaida] = useState<Produto | null>(null);
+  const [quantidadeSaida, setQuantidadeSaida] = useState('');
+
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [produtoEditando, setProdutoEditando] = useState<Produto | null>(null);
   const [editNome, setEditNome] = useState('');
@@ -154,6 +158,41 @@ export default function ProdutosScreen() {
     }
   };
 
+  const abrirModalSaida = (produto: Produto) => {
+    setProdutoSaida(produto);
+    setQuantidadeSaida('');
+    setSaidaModalVisible(true);
+  };
+
+  const confirmarSaida = async () => {
+    if (!produtoSaida) return;
+
+    const qtd = parseInt(quantidadeSaida);
+    if (isNaN(qtd) || qtd <= 0) {
+      Alert.alert('Erro', 'Informe uma quantidade válida!');
+      return;
+    }
+
+    if (qtd > produtoSaida.quantidade) {
+      Alert.alert('Erro', 'Quantidade superior ao disponível!');
+      return;
+    }
+
+    try {
+      await api.post('/produto/saida', {
+        produtoId: produtoSaida.idProduto,
+        propriedadeId: selectedPropriedade?.id,
+        quantidade: qtd
+      });
+      Alert.alert('Sucesso', 'Saída registrada!');
+      atualizarProdutos();
+    } catch (err: any) {
+      Alert.alert('Erro', err.response?.data?.error || 'Erro ao registrar saída');
+    } finally {
+      setSaidaModalVisible(false);
+    }
+  };
+
   useEffect(() => {
     if (isFocused) {
       atualizarProdutos();
@@ -224,14 +263,14 @@ export default function ProdutosScreen() {
               <View style={styles.actions}>
                 <IconButton icon="pencil" size={30} onPress={() => abrirEditar(item)} />
                 <IconButton icon="close" mode='outlined' size={30} iconColor='red' onPress={() => abrirModalDesativar(item)} />
-                <IconButton icon="arrow-right" mode='contained-tonal' size={30} iconColor='green' onPress={() => realizarSaida(item)} />
+                <IconButton icon="arrow-right" mode='contained-tonal' size={30} iconColor='green' onPress={() => abrirModalSaida(item)} />
               </View>
             </View>
           )}
         />
       )}
 
-      {/* Modal Editar */}
+      {/* modal de edição*/}
       <Modal visible={editModalVisible} transparent animationType="slide">
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
@@ -267,7 +306,7 @@ export default function ProdutosScreen() {
               style={styles.modalInput}
             />
 
-            {/* Menu de Embalagens exclusivo */}
+            {/* menu das embalagens*/}
             <View style={{ marginBottom: 16 }}>
               <Text style={{ marginBottom: 6, fontWeight: 'bold', color: '#555' }}>Embalagem</Text>
               <TouchableOpacity
@@ -324,7 +363,7 @@ export default function ProdutosScreen() {
       </Modal>
 
 
-      {/* Modal Desativar */}
+      {/* modal de desativação*/}
       <Modal visible={desativarModalVisible} transparent>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
@@ -352,6 +391,45 @@ export default function ProdutosScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* modal de saida*/}
+      <Modal visible={saidaModalVisible} transparent>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
+              Retirada de Produto
+            </Text>
+
+            <Text style={{ marginTop: 10, fontSize: 16 }}>
+              Quantidade disponível: {produtoSaida?.quantidade}
+            </Text>
+
+            <RNTextInput
+              placeholder="Quantidade a retirar"
+              keyboardType="numeric"
+              value={quantidadeSaida}
+              onChangeText={setQuantidadeSaida}
+              style={styles.modalInput}
+            />
+
+            <Button
+              mode="contained"
+              style={styles.addButton}
+              labelStyle={{ color: '#000', fontWeight: '500', fontSize: 18 }}
+              onPress={confirmarSaida}
+            >
+              Confirmar
+            </Button>
+
+            <Button
+              labelStyle={{ color: '#000', fontWeight: '500', fontSize: 18 }}
+              onPress={() => setSaidaModalVisible(false)}
+            >
+              Cancelar
+            </Button>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -373,7 +451,7 @@ const styles = StyleSheet.create({
     alignItems: 'center'
   },
   itemInfo: { flex: 1, paddingRight: 8 },
-  itemLabel: { fontWeight: 'bold', fontSize: 14, color: '#555', marginTop: 4 },
+  itemLabel: { fontWeight: 'bold', fontSize: 15, color: '#555', marginTop: 4 },
   actions: { flexDirection: 'row', alignItems: 'center', gap: 10, },
   modalContainer: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' },
   modalContent: { backgroundColor: '#fff', padding: 20, borderRadius: 10, width: '80%' },
