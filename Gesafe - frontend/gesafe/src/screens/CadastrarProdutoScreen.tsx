@@ -53,6 +53,36 @@ export default function CadastrarProdutoScreen({ navigation }: any) {
     fetchPropriedades();
   }, []);
 
+  const getLastDayOfMonth = (month: number, year: number): number => {
+    if ([4, 6, 9, 11].includes(month)) return 30; // Abril, Junho, Setembro, Novembro
+    if (month === 2) {
+      return ((year % 4 === 0 && year % 100 !== 0) || year % 400 === 0) ? 29 : 28;
+    }
+    return 31;
+  };
+
+  const handleValidadeInput = (text: string) => {
+    const digits = text.replace(/[^\d]/g, '');
+
+    // MMYYYY → converte para último dia do mês
+    if (/^\d{6}$/.test(digits)) {
+      const mes = parseInt(digits.substring(0, 2));
+      const ano = parseInt(digits.substring(2));
+      const diaFinal = getLastDayOfMonth(mes, ano);
+      setValidade(`${String(diaFinal).padStart(2, '0')}/${String(mes).padStart(2, '0')}/${ano}`);
+    }
+
+    // DDMMYYYY → formata
+    else if (/^\d{8}$/.test(digits)) {
+      const dia = digits.substring(0, 2);
+      const mes = digits.substring(2, 4);
+      const ano = digits.substring(4);
+      setValidade(`${dia}/${mes}/${ano}`);
+    } else {
+      setValidade(text);
+    }
+  };
+
   const handleCadastrar = async () => {
     const quantidadeNum = parseInt(quantidade);
 
@@ -111,10 +141,12 @@ export default function CadastrarProdutoScreen({ navigation }: any) {
         />
 
         <TextInput
-          label="Validade (DD/MM/AAAA)"
+          label="Validade (DD/MM/AAAA ou MM/AAAA)"
           mode="outlined"
           value={validade}
-          onChangeText={setValidade}
+          onChangeText={handleValidadeInput}
+          keyboardType="numeric"
+          placeholder="DD/MM/AAAA ou MM/AAAA"
           style={styles.input}
         />
 
@@ -148,7 +180,6 @@ export default function CadastrarProdutoScreen({ navigation }: any) {
           </Menu>
         </View>
 
-        {/* ⬇️ Propriedade */}
         <View style={styles.dropdown}>
           <Text style={styles.dropdownLabel}>Propriedade</Text>
           <Menu
@@ -183,11 +214,11 @@ export default function CadastrarProdutoScreen({ navigation }: any) {
 
         <Button
           mode="elevated"
-          icon='content-save-outline'
+          icon="content-save-outline"
           onPress={handleCadastrar}
           loading={loading}
           disabled={loading}
-          labelStyle={{ color: '#575757', fontWeight: '500', fontSize: 20 }}
+          labelStyle={{ color: '#000', fontWeight: '500', fontSize: 20 }}
           style={styles.button}
         >
           {loading ? 'Cadastrando...' : 'Cadastrar Produto'}
@@ -224,6 +255,6 @@ const styles = StyleSheet.create({
   button: {
     marginVertical: 16,
     borderRadius: 10,
-    backgroundColor: '#c8d7d3'
+    backgroundColor: '#c8d7d3',
   },
 });

@@ -23,7 +23,8 @@ export default function CustomAppBar({ navigation }: Props) {
                     resizeMode="contain"
                 />
 
-                <Appbar.Action icon="logout" onPress={signOut} />
+                <View style={{ width: 50, height: 50 }}></View>
+                {/* <Appbar.Action icon="logout" onPress={signOut} /> */}
             </View>
         </SafeAreaView>
     );

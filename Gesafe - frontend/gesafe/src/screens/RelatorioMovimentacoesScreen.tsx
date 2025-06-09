@@ -48,8 +48,22 @@ export default function RelatorioMovimentacoesScreen({ navigation }: any) {
             <CustomAppBar navigation={navigation} />
             <Text style={styles.title}>Relatório de Movimentações</Text>
 
-            <Button onPress={() => setMenuVisible(true)}>{selectedPropriedade?.nome || 'Selecionar Propriedade'}</Button>
-            <Menu visible={menuVisible} onDismiss={() => setMenuVisible(false)} anchor={{ x: 0, y: 0 }}>
+            <Menu
+                visible={menuVisible}
+                onDismiss={() => setMenuVisible(false)}
+                anchor={
+                    <Button
+                        mode="outlined"
+                        icon="chevron-down"
+                        contentStyle={{ flexDirection: 'row-reverse' }}
+                        onPress={() => setMenuVisible(true)}
+                        style={styles.selectorButton}
+                        labelStyle={{ color: '#575757', fontWeight: 'bold', fontSize: 18 }}
+                    >
+                        {selectedPropriedade?.nome || 'Selecionar propriedade'}
+                    </Button>
+                }
+            >
                 {propriedades.map((p) => (
                     <Menu.Item key={p.id} onPress={() => { setSelectedPropriedade(p); setMenuVisible(false); }} title={p.nome} />
                 ))}
@@ -57,7 +71,13 @@ export default function RelatorioMovimentacoesScreen({ navigation }: any) {
             </Menu>
 
             <Button onPress={() => setMenuTipoVisible(true)}>{selectedTipo}</Button>
-            <Menu visible={menuTipoVisible} onDismiss={() => setMenuTipoVisible(false)} anchor={{ x: 0, y: 0 }}>
+            <Menu
+                visible={menuTipoVisible}
+                onDismiss={() => setMenuTipoVisible(false)}
+                anchor={
+                    { x: 0, y: 0 }
+                }
+            >
                 {tipos.map((t) => (
                     <Menu.Item key={t} onPress={() => { setSelectedTipo(t); setMenuTipoVisible(false); }} title={t} />
                 ))}
@@ -69,7 +89,13 @@ export default function RelatorioMovimentacoesScreen({ navigation }: any) {
                 ))}
             </ScrollView>
 
-            <Button onPress={gerarPDF} style={styles.button}>Gerar PDF</Button>
+            <Button
+                labelStyle={{ color: '#575757', fontWeight: '500', fontSize: 20 }}
+                onPress={gerarPDF}
+                style={styles.button}
+            >
+                Gerar PDF
+            </Button>
         </View>
     );
 }
@@ -77,5 +103,6 @@ export default function RelatorioMovimentacoesScreen({ navigation }: any) {
 const styles = StyleSheet.create({
     container: { flex: 1, padding: 12 },
     title: { fontSize: 18, fontWeight: 'bold' },
-    button: { marginTop: 16 }
+    button: { marginTop: 16, backgroundColor: '#c8d7d3', borderRadius: 10 },
+    selectorButton: { borderRadius: 6, borderColor: '#144734', width: '100%' },
 });

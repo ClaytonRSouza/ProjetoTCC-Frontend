@@ -1,19 +1,26 @@
-import { useNavigation } from '@react-navigation/native';
-import React from 'react';
-import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
-import { Appbar, Card, Text } from 'react-native-paper';
+import { useIsFocused, useNavigation } from '@react-navigation/native';
+import React, { useEffect, useState } from 'react';
+import { Image, StyleSheet, View } from 'react-native';
+import { Appbar, Card, Menu, Text } from 'react-native-paper';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function HomeScreen() {
     const navigation = useNavigation<any>();
     const { signOut, userName } = useAuth();
+    const { atualizarPerfil } = useAuth();
+    const isFocused = useIsFocused();
+    const [menuVisible, setMenuVisible] = useState(false);
+
+    useEffect(() => {
+        if (isFocused) {
+            atualizarPerfil();
+        }
+    }, [isFocused]);
 
     return (
         <View style={styles.container}>
             <Appbar.Header style={styles.appBar}>
-                <TouchableOpacity onPress={signOut}>
-                    <Appbar.BackAction />
-                </TouchableOpacity>
+                <View style={{ width: 70, height: 70 }}></View>
 
                 <Image
                     source={require('../assets/logoBarra.png')}
@@ -21,7 +28,34 @@ export default function HomeScreen() {
                     resizeMode="contain"
                 />
 
-                <Appbar.Action icon="logout" onPress={signOut} />
+                <Menu
+                    visible={menuVisible}
+                    onDismiss={() => setMenuVisible(false)}
+                    anchor={
+                        <Appbar.Action
+                            icon="account-circle"
+                            size={35}
+                            onPress={() => setMenuVisible(true)}
+                        />
+                    }
+                >
+                    <Menu.Item
+                        onPress={() => {
+                            setMenuVisible(false);
+                            navigation.navigate('EditarPerfil');
+                        }}
+                        title="Editar Perfil"
+                        leadingIcon="account-edit"
+                    />
+                    <Menu.Item
+                        onPress={() => {
+                            setMenuVisible(false);
+                            signOut();
+                        }}
+                        title="Sair"
+                        leadingIcon="logout"
+                    />
+                </Menu>
             </Appbar.Header>
 
             <Text style={styles.greeting}>
@@ -63,7 +97,6 @@ export default function HomeScreen() {
                         <Text style={styles.optionText}>Propriedades</Text>
                     </Card.Content>
                 </Card>
-
             </View>
         </View>
     );
@@ -97,5 +130,5 @@ const styles = StyleSheet.create({
     },
     cardContent: { alignItems: 'center', justifyContent: 'center' },
     icon: { width: 45, height: 45, marginBottom: 8, marginTop: 8, resizeMode: 'contain' },
-    optionText: { fontSize: 16, color: '#144734', fontWeight: 'semibold' },
+    optionText: { fontSize: 16, color: '#144734', fontWeight: '600' },
 });

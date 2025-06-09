@@ -39,6 +39,6 @@ const styles = StyleSheet.create({
     container: { flex: 1, padding: 20, backgroundColor: '#f5f5f5' },
     title: { fontSize: 20, fontWeight: 'bold', marginBottom: 20, textAlign: 'center' },
     card: { borderRadius: 10, marginBottom: 20 },
-    cardTitle: { fontWeight: 'bold', fontSize: 18 },
-    cardDesc: { fontSize: 14, marginTop: 8 },
+    cardTitle: { fontWeight: 'bold', fontSize: 20 },
+    cardDesc: { fontSize: 15, marginTop: 8 },
 });

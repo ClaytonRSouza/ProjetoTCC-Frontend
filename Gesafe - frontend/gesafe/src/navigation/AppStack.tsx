@@ -2,6 +2,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
 import CadastrarProdutoScreen from '../screens/CadastrarProdutoScreen';
 import CadastrarPropriedadeScreen from '../screens/CadastrarPropriedadeScreen';
+import EditarPerfilScreen from '../screens/EditarPerfilScreen';
 import HomeScreen from '../screens/HomeScreen';
 import MovimentacoesScreen from '../screens/MovimentacoesScreen';
 import ProdutosScreen from '../screens/ProdutosScreen';
@@ -26,6 +27,7 @@ export default function AppStack() {
       <Stack.Screen name="RelatorioEstoque" component={RelatorioEstoqueScreen} />
       <Stack.Screen name="RelatorioMovimentacoes" component={RelatorioMovimentacoesScreen} />
       <Stack.Screen name="RelatorioVencimentos" component={RelatorioVencimentosScreen} />
+      <Stack.Screen name="EditarPerfil" component={EditarPerfilScreen} />
     </Stack.Navigator>
   );
 }

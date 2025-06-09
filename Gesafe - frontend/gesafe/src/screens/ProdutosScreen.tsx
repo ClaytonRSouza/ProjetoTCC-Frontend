@@ -1,7 +1,7 @@
 import { useIsFocused, useNavigation } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
 import {
-  Alert, FlatList, Modal, TextInput as RNTextInput, StyleSheet, View
+  Alert, FlatList, Modal, TextInput as RNTextInput, ScrollView, StyleSheet, TouchableOpacity, View
 } from 'react-native';
 import {
   ActivityIndicator, Button, IconButton, Menu, Text
@@ -41,6 +41,8 @@ export default function ProdutosScreen() {
   const [editNome, setEditNome] = useState('');
   const [editValidade, setEditValidade] = useState('');
   const [editEmbalagem, setEditEmbalagem] = useState('');
+  const [embalagemMenuVisible, setEmbalagemMenuVisible] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
   const embalagens = [
     'SACARIA', 'BAG_1TN', 'BAG_750KG', 'LITRO', 'GALAO_2L', 'GALAO_5L',
     'GALAO_10L', 'BALDE_20L', 'TAMBOR_200L', 'IBC_1000L',
@@ -51,6 +53,7 @@ export default function ProdutosScreen() {
   const [desativarModalVisible, setDesativarModalVisible] = useState(false);
   const [produtoDesativando, setProdutoDesativando] = useState<Produto | null>(null);
   const [justificativa, setJustificativa] = useState('');
+
 
   useEffect(() => {
     const fetchPropriedades = async () => {
@@ -195,7 +198,7 @@ export default function ProdutosScreen() {
       <Button
         mode="elevated"
         icon='plus-circle-outline'
-        labelStyle={{ color: '#575757', fontWeight: '500', fontSize: 18 }}
+        labelStyle={{ color: '#000', fontWeight: '500', fontSize: 18 }}
         style={styles.addButton}
         onPress={() => navigation.navigate('CadastrarProduto')}
       >
@@ -211,17 +214,17 @@ export default function ProdutosScreen() {
           renderItem={({ item }) => (
             <View style={styles.itemContainer}>
               <View style={styles.itemInfo}>
-                <Text style={styles.itemLabel}>Produto</Text>
-                <Text>{item.nome.toUpperCase()} {item.embalagem.replace(/_/g, ' ')}</Text>
+                <Text style={styles.itemLabel}>Produto </Text>
+                <Text style={styles.itemProduct}>{item.nome.toUpperCase()} - {item.embalagem.replace(/_/g, ' ')}</Text>
                 <Text style={styles.itemLabel}>Vencimento</Text>
-                <Text>{item.validade}</Text>
+                <Text style={styles.itemProduct}>{item.validade}</Text>
                 <Text style={styles.itemLabel}>Quantidade</Text>
-                <Text>{item.quantidade}</Text>
+                <Text style={{ fontSize: 22, fontWeight: 'bold' }}>{item.quantidade}</Text>
               </View>
               <View style={styles.actions}>
-                <IconButton icon="pencil" onPress={() => abrirEditar(item)} />
-                <IconButton icon="close" onPress={() => abrirModalDesativar(item)} />
-                <IconButton icon="arrow-right" onPress={() => realizarSaida(item)} />
+                <IconButton icon="pencil" size={30} onPress={() => abrirEditar(item)} />
+                <IconButton icon="close" mode='outlined' size={30} iconColor='red' onPress={() => abrirModalDesativar(item)} />
+                <IconButton icon="arrow-right" mode='contained-tonal' size={30} iconColor='green' onPress={() => realizarSaida(item)} />
               </View>
             </View>
           )}
@@ -229,41 +232,103 @@ export default function ProdutosScreen() {
       )}
 
       {/* Modal Editar */}
-      <Modal visible={editModalVisible} transparent>
+      <Modal visible={editModalVisible} transparent animationType="slide">
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <Text>Editar Produto</Text>
+            <Text style={styles.modalTitle}>Editar Produto</Text>
+
             <RNTextInput
-              placeholder="Nome"
+              placeholder="Nome do Produto"
               value={editNome}
-              onChangeText={setEditNome}
+              onChangeText={(text) => setEditNome(text.toUpperCase())}
               style={styles.modalInput}
             />
+
             <RNTextInput
-              placeholder="Validade (DD/MM/AAAA)"
+              placeholder="Validade"
+              keyboardType="numeric"
               value={editValidade}
-              onChangeText={setEditValidade}
+              onChangeText={(text) => {
+                const digits = text.replace(/[^\d]/g, '');
+                if (/^\d{6}$/.test(digits)) {
+                  const mes = parseInt(digits.substring(0, 2));
+                  const ano = parseInt(digits.substring(2));
+                  const lastDay = new Date(ano, mes, 0).getDate();
+                  setEditValidade(`${String(lastDay).padStart(2, '0')}/${String(mes).padStart(2, '0')}/${ano}`);
+                } else if (/^\d{8}$/.test(digits)) {
+                  const dia = digits.substring(0, 2);
+                  const mes = digits.substring(2, 4);
+                  const ano = digits.substring(4);
+                  setEditValidade(`${dia}/${mes}/${ano}`);
+                } else {
+                  setEditValidade(text);
+                }
+              }}
               style={styles.modalInput}
             />
-            <RNTextInput
-              placeholder="Embalagem"
-              value={editEmbalagem}
-              onChangeText={setEditEmbalagem}
-              style={styles.modalInput}
-            />
-            <Button mode="contained" onPress={confirmarEditar}>
-              Confirmar
-            </Button>
-            <Button onPress={() => setEditModalVisible(false)}>Cancelar</Button>
+
+            {/* Menu de Embalagens exclusivo */}
+            <View style={{ marginBottom: 16 }}>
+              <Text style={{ marginBottom: 6, fontWeight: 'bold', color: '#555' }}>Embalagem</Text>
+              <TouchableOpacity
+                onPress={() => setShowDropdown(!showDropdown)}
+                style={styles.dropdownAnchor}
+              >
+                <Text style={styles.dropdownText}>
+                  {editEmbalagem ? editEmbalagem.replace(/_/g, ' ') : 'Selecionar...'}
+                </Text>
+                <IconButton icon={showDropdown ? "menu-up" : "menu-down"} size={20} />
+              </TouchableOpacity>
+
+              {showDropdown && (
+                <ScrollView
+                  style={styles.dropdownList}
+                  nestedScrollEnabled
+                  contentContainerStyle={{ paddingVertical: 6 }}
+                >
+                  {embalagens.map((item) => (
+                    <TouchableOpacity
+                      key={item}
+                      onPress={() => {
+                        setEditEmbalagem(item);
+                        setShowDropdown(false);
+                      }}
+                      style={styles.dropdownItem}
+                    >
+                      <Text style={styles.dropdownText}>{item.replace(/_/g, ' ')}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+
+              )}
+            </View>
+
+            <View>
+              <Button
+                mode="contained"
+                labelStyle={{ color: '#000', fontWeight: '500', fontSize: 18 }}
+                style={[styles.addButton]}
+                onPress={confirmarEditar}
+              >
+                Confirmar
+              </Button>
+              <Button
+                labelStyle={{ color: '#000', fontWeight: '500', fontSize: 18 }}
+                onPress={() => setEditModalVisible(false)}
+              >
+                Cancelar
+              </Button>
+            </View>
           </View>
         </View>
       </Modal>
+
 
       {/* Modal Desativar */}
       <Modal visible={desativarModalVisible} transparent>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <Text>Justificativa da Desativação</Text>
+            <Text style={{ fontSize: 15, fontWeight: 700 }}>Justificativa da Desativação</Text>
             <RNTextInput
               placeholder="Descreva o motivo"
               value={justificativa}
@@ -271,10 +336,19 @@ export default function ProdutosScreen() {
               style={styles.modalInput}
               multiline
             />
-            <Button mode="contained" onPress={confirmarDesativacao}>
+            <Button
+              mode="contained"
+              labelStyle={{ color: '#000', fontWeight: '500', fontSize: 18 }}
+              style={styles.addButton}
+              onPress={confirmarDesativacao}
+            >
               Confirmar
             </Button>
-            <Button onPress={() => setDesativarModalVisible(false)}>Cancelar</Button>
+            <Button
+              labelStyle={{ color: '#000', fontWeight: '500', fontSize: 18 }}
+              onPress={() => setDesativarModalVisible(false)}
+            >
+              Cancelar</Button>
           </View>
         </View>
       </Modal>
@@ -299,9 +373,47 @@ const styles = StyleSheet.create({
     alignItems: 'center'
   },
   itemInfo: { flex: 1, paddingRight: 8 },
-  itemLabel: { fontWeight: 'bold', fontSize: 12, color: '#555', marginTop: 4 },
-  actions: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  itemLabel: { fontWeight: 'bold', fontSize: 14, color: '#555', marginTop: 4 },
+  actions: { flexDirection: 'row', alignItems: 'center', gap: 10, },
   modalContainer: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' },
   modalContent: { backgroundColor: '#fff', padding: 20, borderRadius: 10, width: '80%' },
-  modalInput: { borderBottomWidth: 1, borderBottomColor: '#ccc', marginBottom: 12, padding: 8 }
+  modalInput: { borderBottomWidth: 1, fontSize: 18, borderBottomColor: '#ccc', marginBottom: 12, padding: 8 },
+  itemProduct: { fontSize: 14, fontWeight: 'bold' },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  dropdownAnchor: {
+    backgroundColor: '#fff',
+    padding: 14,
+    borderRadius: 4,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  dropdownText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  dropdownList: {
+    backgroundColor: '#fff',
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 6,
+    marginTop: 6,
+    maxHeight: 200, // 👈 limita a altura visível
+    zIndex: 999,
+  },
+
+  dropdownItem: {
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+
 });

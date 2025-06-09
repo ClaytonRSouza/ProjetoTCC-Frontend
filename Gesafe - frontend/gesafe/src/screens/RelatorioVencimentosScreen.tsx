@@ -76,7 +76,13 @@ export default function RelatorioVencimentosScreen({ navigation }: any) {
                 ))}
             </ScrollView>
 
-            <Button onPress={gerarPDF} style={styles.button}>Gerar PDF</Button>
+            <Button
+                onPress={gerarPDF}
+                labelStyle={{ color: '#575757', fontWeight: '500', fontSize: 20 }}
+                style={styles.button}
+            >
+                Gerar PDF
+            </Button>
         </View>
     );
 }
@@ -84,5 +90,5 @@ export default function RelatorioVencimentosScreen({ navigation }: any) {
 const styles = StyleSheet.create({
     container: { flex: 1, padding: 12 },
     title: { fontSize: 18, fontWeight: 'bold' },
-    button: { marginTop: 16 }
+    button: { marginTop: 16, backgroundColor: '#c8d7d3', borderRadius: 10 },
 });

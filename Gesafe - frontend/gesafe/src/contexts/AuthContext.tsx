@@ -14,6 +14,7 @@ interface AuthContextType {
     userName: string | null;
     signIn: (email: string, password: string) => Promise<void>;
     signOut: () => Promise<void>;
+    atualizarPerfil: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -23,7 +24,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [userName, setUserName] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
-    // Carrega token do armazenamento seguro ao iniciar o app
     useEffect(() => {
         const initializeAuth = async () => {
             try {
@@ -33,6 +33,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 if (storedToken) {
                     setToken(storedToken);
                     api.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
+                    await atualizarPerfil();  // ✅ Ao iniciar já atualiza o perfil
                 }
             } catch (error) {
                 console.error('Erro ao carregar token do SecureStore:', error);
@@ -44,7 +45,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         initializeAuth();
     }, []);
 
-    // Toda vez que o token mudar, atualiza o header do Axios
     useEffect(() => {
         if (token) {
             api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
@@ -61,13 +61,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             const response = await api.post('/auth/login', { email, senha });
 
             const receivedToken = response.data.token;
-            const receivedName = response.data.nome;
 
             if (!receivedToken) throw new Error('Token ausente da resposta');
 
             await saveTokenToSecureStore(receivedToken);
             setToken(receivedToken);
-            setUserName(receivedName || null);
+
+            await atualizarPerfil();  // ✅ Após login atualiza perfil
+
             await verificarProdutosAVencer();
 
             console.log('Login realizado com sucesso. Token salvo.');
@@ -77,6 +78,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             throw error;
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const atualizarPerfil = async () => {
+        if (!token) return;
+        try {
+            const res = await api.get('/auth/perfil');
+            const nomeAtualizado = res.data.usuario.nome;
+            setUserName(nomeAtualizado);
+        } catch (error) {
+            console.error('Erro ao atualizar perfil:', error);
         }
     };
 
@@ -117,6 +129,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 userName,
                 signIn,
                 signOut,
+                atualizarPerfil,
             }}
         >
             {children}
