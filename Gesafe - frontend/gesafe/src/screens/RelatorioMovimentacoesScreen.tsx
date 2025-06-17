@@ -1,108 +1,88 @@
-import * as Print from 'expo-print';
-import * as Sharing from 'expo-sharing';
 import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
-import { Button, Menu, Text } from 'react-native-paper';
-import CustomAppBar from '../components/CustomAppBar';
+import { StyleSheet, View } from 'react-native';
+import { Button, Text } from 'react-native-paper';
+import FiltroMenuSelector from '../components/FiltroMenuSelector';
+import FiltroPropriedadeSelector from '../components/FiltroPropriedadeSelector';
+import RelatorioLayout from '../components/RelatorioLayout';
 import { api } from '../services/api';
+import { gerarPdfRelatorio } from '../utils/gerarPdfRelatorio';
 
 export default function RelatorioMovimentacoesScreen({ navigation }: any) {
     const [relatorio, setRelatorio] = useState<any[]>([]);
-    const [propriedades, setPropriedades] = useState<any[]>([]);
     const [selectedPropriedade, setSelectedPropriedade] = useState<any | null>(null);
-    const [menuVisible, setMenuVisible] = useState(false);
+    const [selectedTipo, setSelectedTipo] = useState<string | null>("TODOS");
 
-    const tipos = ["TODOS", "ENTRADA", "SAIDA", "DESATIVACAO"];
-    const [selectedTipo, setSelectedTipo] = useState<string>("TODOS");
-    const [menuTipoVisible, setMenuTipoVisible] = useState(false);
+    const tipos = ["ENTRADA", "SAIDA", "DESATIVACAO", "AJUSTE"];
 
-    useEffect(() => { fetchPropriedades(); }, []);
-    useEffect(() => { fetchRelatorio(); }, [selectedTipo, selectedPropriedade]);
-
-    const fetchPropriedades = async () => {
-        const res = await api.get('/auth/propriedades');
-        setPropriedades(res.data.propriedades);
-    };
+    useEffect(() => {
+        fetchRelatorio();
+    }, [selectedTipo, selectedPropriedade]);
 
     const fetchRelatorio = async () => {
         const params: any = {};
         if (selectedPropriedade) params.propriedadeId = selectedPropriedade.id;
-        if (selectedTipo !== "TODOS") params.tipo = selectedTipo;
+        if (selectedTipo && selectedTipo !== "TODOS") params.tipo = selectedTipo;
         const res = await api.get('/produto/relatorio-movimentacoes', { params });
         setRelatorio(res.data.relatorio);
     };
 
-    const gerarPDF = async () => {
-        const html = `
-      <html><body>
-      <h1>Relatório de Movimentações</h1>
-      ${relatorio.map(m => `<p>${m.data} - ${m.tipo} - ${m.produtoNome} - ${m.quantidade} un - ${m.propriedadeNome}</p>`).join('')}
-      </body></html>
-    `;
-        const { uri } = await Print.printToFileAsync({ html });
-        await Sharing.shareAsync(uri);
+    const handleGerarPDF = () => {
+        const dadosFormatados = relatorio.map((m: any) => ({
+            propriedade: m.propriedadeNome,
+            produto: m.produtoNome,
+            embalagem: m.embalagem,
+            quantidade: m.quantidade,
+            tipo: m.tipo,
+            justificativa: m.justificativa,
+            validade: "", // não aplicável
+        }));
+
+        gerarPdfRelatorio("Relatório de Movimentações", dadosFormatados);
     };
 
     return (
-        <View style={styles.container}>
-            <CustomAppBar navigation={navigation} />
-            <Text style={styles.title}>Relatório de Movimentações</Text>
-
-            <Menu
-                visible={menuVisible}
-                onDismiss={() => setMenuVisible(false)}
-                anchor={
+        <RelatorioLayout
+            navigation={navigation}
+            titulo="Relatório de Movimentações"
+            filtros={
+                <>
+                    <FiltroPropriedadeSelector selected={selectedPropriedade} onSelect={setSelectedPropriedade} />
+                    <FiltroMenuSelector
+                        label="Tipo de Movimentação"
+                        valores={["TODOS", ...tipos]}
+                        valorSelecionado={selectedTipo}
+                        onSelecionar={setSelectedTipo}
+                    />
+                </>
+            }
+            rodape={
+                <View style={{ marginTop: 16 }}>
                     <Button
-                        mode="outlined"
-                        icon="chevron-down"
-                        contentStyle={{ flexDirection: 'row-reverse' }}
-                        onPress={() => setMenuVisible(true)}
-                        style={styles.selectorButton}
-                        labelStyle={{ color: '#575757', fontWeight: 'bold', fontSize: 18 }}
+                        icon="file-pdf-box"
+                        mode="elevated"
+                        onPress={handleGerarPDF}
+                        style={styles.button}
+                        labelStyle={{ color: '#000', fontWeight: '500', fontSize: 20 }}
                     >
-                        {selectedPropriedade?.nome || 'Selecionar propriedade'}
+                        Gerar PDF
                     </Button>
-                }
-            >
-                {propriedades.map((p) => (
-                    <Menu.Item key={p.id} onPress={() => { setSelectedPropriedade(p); setMenuVisible(false); }} title={p.nome} />
-                ))}
-                <Menu.Item onPress={() => { setSelectedPropriedade(null); setMenuVisible(false); }} title="Todas" />
-            </Menu>
-
-            <Button onPress={() => setMenuTipoVisible(true)}>{selectedTipo}</Button>
-            <Menu
-                visible={menuTipoVisible}
-                onDismiss={() => setMenuTipoVisible(false)}
-                anchor={
-                    { x: 0, y: 0 }
-                }
-            >
-                {tipos.map((t) => (
-                    <Menu.Item key={t} onPress={() => { setSelectedTipo(t); setMenuTipoVisible(false); }} title={t} />
-                ))}
-            </Menu>
-
-            <ScrollView>
-                {relatorio.map((m, i) => (
-                    <Text key={i}>{m.data} - {m.tipo} - {m.produtoNome} - {m.quantidade} un - {m.propriedadeNome} ({m.justificativa})</Text>
-                ))}
-            </ScrollView>
-
-            <Button
-                labelStyle={{ color: '#575757', fontWeight: '500', fontSize: 20 }}
-                onPress={gerarPDF}
-                style={styles.button}
-            >
-                Gerar PDF
-            </Button>
-        </View>
+                </View>
+            }
+        >
+            {relatorio.map((m, i) => (
+                <Text key={i}>
+                    {m.data} - {m.tipo} - {m.produtoNome} - {m.quantidade} un - {m.propriedadeNome} ({m.justificativa})
+                </Text>
+            ))}
+        </RelatorioLayout>
     );
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, padding: 12 },
-    title: { fontSize: 18, fontWeight: 'bold' },
-    button: { marginTop: 16, backgroundColor: '#c8d7d3', borderRadius: 10 },
-    selectorButton: { borderRadius: 6, borderColor: '#144734', width: '100%' },
+    total: { fontWeight: 'bold', fontSize: 16 },
+    button: {
+        marginVertical: 16,
+        borderRadius: 10,
+        backgroundColor: '#c8d7d3',
+    },
 });

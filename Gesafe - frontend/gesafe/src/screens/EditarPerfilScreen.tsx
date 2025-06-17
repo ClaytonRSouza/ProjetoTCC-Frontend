@@ -12,6 +12,7 @@ export default function EditarPerfilScreen({ navigation }: any) {
 
     const [nome, setNome] = useState('');
     const [email, setEmail] = useState('');
+    const [emailError, setEmailError] = useState('');
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
@@ -29,9 +30,19 @@ export default function EditarPerfilScreen({ navigation }: any) {
         }
     };
 
+    const validarEmail = (email: string) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    };
+
     const handleSalvar = async () => {
         if (!nome || !email) {
             Alert.alert('Erro', 'Preencha todos os campos.');
+            return;
+        }
+
+        if (!validarEmail(email)) {
+            setEmailError('O email deve ser válido');
             return;
         }
 
@@ -64,11 +75,17 @@ export default function EditarPerfilScreen({ navigation }: any) {
             <TextInput
                 label="Email"
                 value={email}
-                onChangeText={setEmail}
+                onChangeText={(text) => {
+                    setEmail(text);
+                    setEmailError('');
+                }}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 style={styles.input}
+                error={!!emailError}
             />
+            {emailError ? <Text style={styles.error}>{emailError}</Text> : null}
+
 
             <Button
                 mode="contained"
@@ -89,4 +106,9 @@ const styles = StyleSheet.create({
     title: { fontSize: 24, fontWeight: 'bold', marginBottom: 20, textAlign: 'center' },
     input: { marginBottom: 16, backgroundColor: '#fff' },
     button: { marginVertical: 16, borderRadius: 10, backgroundColor: '#c8d7d3' },
+    error: {
+        color: 'red',
+        marginBottom: 10,
+        fontSize: 14,
+    },
 });

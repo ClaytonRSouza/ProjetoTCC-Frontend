@@ -33,7 +33,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 if (storedToken) {
                     setToken(storedToken);
                     api.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
-                    await atualizarPerfil();  // ✅ Ao iniciar já atualiza o perfil
+                    await atualizarPerfil();
                 }
             } catch (error) {
                 console.error('Erro ao carregar token do SecureStore:', error);
@@ -67,7 +67,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             await saveTokenToSecureStore(receivedToken);
             setToken(receivedToken);
 
-            await atualizarPerfil();  // ✅ Após login atualiza perfil
+            await atualizarPerfil();
 
             await verificarProdutosAVencer();
 

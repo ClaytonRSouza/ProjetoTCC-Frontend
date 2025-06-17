@@ -63,7 +63,16 @@ export default function ProdutosVencimentoScreen({ navigation }: any) {
                                         style={styles.propriedade}
                                         key={idx}
                                     >
-                                        {p.propriedade}: {p.quantidade}
+                                        {p.propriedade}
+                                    </Text>
+
+                                ))}
+                                {item.propriedades.map((p, idx) => (
+                                    <Text
+                                        style={styles.propriedade}
+                                        key={idx}
+                                    >
+                                        Quantidade: {p.quantidade}
                                     </Text>
 
                                 ))}

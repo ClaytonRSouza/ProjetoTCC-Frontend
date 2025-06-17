@@ -6,6 +6,7 @@ import { api } from '../services/api';
 export default function RegisterScreen({ navigation }: any) {
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
+  const [emailError, setEmailError] = useState('');
   const [senha, setSenha] = useState('');
   const [propriedades, setPropriedades] = useState([{ nome: '' }]);
   const [loading, setLoading] = useState(false);
@@ -18,9 +19,19 @@ export default function RegisterScreen({ navigation }: any) {
     setPropriedades(atualizado);
   };
 
+  const validarEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const handleCadastro = async () => {
     if (!nome || !email || !senha || propriedades.some(p => !p.nome)) {
       Alert.alert('Erro', 'Preencha todos os campos e ao menos uma propriedade.');
+      return;
+    }
+
+    if (!validarEmail(email)) {
+      setEmailError('O email deve ser válido');
       return;
     }
 
@@ -47,7 +58,20 @@ export default function RegisterScreen({ navigation }: any) {
       <Text style={styles.title}>Criar Conta</Text>
 
       <TextInput label="Nome" value={nome} onChangeText={setNome} style={styles.input} />
-      <TextInput label="Email" value={email} onChangeText={setEmail} style={styles.input} />
+      <TextInput
+        label="Email"
+        value={email}
+        onChangeText={(text) => {
+          setEmail(text);
+          setEmailError(''); // limpa erro enquanto digita
+        }}
+        style={styles.input}
+        keyboardType="email-address"
+        autoCapitalize="none"
+        error={!!emailError}
+      />
+      {emailError ? <Text style={styles.error}>{emailError}</Text> : null}
+
       <TextInput label="Senha" value={senha} onChangeText={setSenha} secureTextEntry style={styles.input} />
 
       <Text style={styles.subtitle}>Propriedades</Text>
@@ -92,4 +116,9 @@ const styles = StyleSheet.create({
   subtitle: { fontSize: 16, fontWeight: 'bold', marginBottom: 8 },
   input: { marginBottom: 16, backgroundColor: '#f0f0f0', borderColor: '#575757', borderWidth: 1 },
   button: { marginBottom: 16, backgroundColor: '#c8d7d3', borderRadius: 10 },
+  error: {
+    color: 'red',
+    marginBottom: 10,
+    fontSize: 14,
+  },
 });
