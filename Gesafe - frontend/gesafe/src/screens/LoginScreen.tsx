@@ -1,5 +1,14 @@
 import React, { useState } from 'react';
-import { Alert, Image, Modal, StyleSheet, View } from 'react-native';
+import {
+    Alert,
+    Image,
+    KeyboardAvoidingView,
+    Modal,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    View,
+} from 'react-native';
 import { Button, Text, TextInput } from 'react-native-paper';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
@@ -47,92 +56,140 @@ export default function LoginScreen({ navigation }: any) {
     };
 
     return (
-        <View style={styles.container}>
-            <Image source={require('../assets/logoApp.png')} style={styles.logo} />
-            <Text style={styles.title}>Entrar no Gesafe</Text>
-
-            <TextInput
-                label="E-mail"
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                style={styles.input}
-            />
-            <TextInput
-                label="Senha"
-                value={senha}
-                onChangeText={setSenha}
-                secureTextEntry
-                style={styles.input}
-            />
-
-            <Button
-                mode="elevated"
-                icon='login'
-                onPress={handleLogin}
-                loading={loading}
-                disabled={loading}
-                labelStyle={{ color: '#000', fontWeight: '500', fontSize: 20 }}
-                style={styles.button}
+        <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+            style={{ flex: 1 }}
+        >
+            <ScrollView
+                contentContainerStyle={styles.container}
+                keyboardShouldPersistTaps="handled"
             >
-                Entrar
-            </Button>
+                <Image
+                    source={require('../assets/logoApp.png')}
+                    style={styles.logo}
+                />
+                <Text style={styles.title}>Entrar no Gesafe</Text>
 
-            <Button
-                labelStyle={{ color: '#575757', fontWeight: 'bold', fontSize: 15 }}
-                onPress={() => navigation.navigate('Register')}
-            >
-                Não tem conta? Criar agora
-            </Button>
+                <TextInput
+                    label="E-mail"
+                    value={email}
+                    onChangeText={setEmail}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    style={styles.input}
+                />
+                <TextInput
+                    label="Senha"
+                    value={senha}
+                    onChangeText={setSenha}
+                    secureTextEntry
+                    style={styles.input}
+                />
 
-            <Button
-                labelStyle={{ color: '#575757', fontWeight: 'bold', fontSize: 15 }}
-                onPress={() => setModalVisible(true)}
-            >
-                Esqueceu a senha?
-            </Button>
+                <Button
+                    mode="elevated"
+                    icon="login"
+                    onPress={handleLogin}
+                    loading={loading}
+                    disabled={loading}
+                    labelStyle={{ color: '#000', fontWeight: '500', fontSize: 20 }}
+                    style={styles.button}
+                >
+                    Entrar
+                </Button>
 
-            <Modal visible={modalVisible} transparent>
-                <View style={styles.modalContainer}>
-                    <View style={styles.modalContent}>
-                        <Text>Informe seu e-mail para redefinir a senha</Text>
-                        <TextInput
-                            placeholder="E-mail"
-                            value={resetEmail}
-                            onChangeText={setResetEmail}
-                            style={styles.modalInput}
-                            keyboardType="email-address"
-                            autoCapitalize="none"
-                        />
-                        <Button
-                            mode="contained"
-                            style={styles.button}
-                            labelStyle={{ color: '#000', fontWeight: '500', fontSize: 18 }}
-                            onPress={solicitarResetSenha}
-                        >
-                            Enviar
-                        </Button>
-                        <Button
-                            labelStyle={{ color: '#000', fontWeight: '500', fontSize: 18 }}
-                            onPress={() => setModalVisible(false)}
-                        >
-                            Cancelar
-                        </Button>
+                <Button
+                    labelStyle={{ color: '#575757', fontWeight: 'bold', fontSize: 15 }}
+                    onPress={() => navigation.navigate('Register')}
+                >
+                    Não tem conta? Criar agora
+                </Button>
+
+                {/* <Button
+                    labelStyle={{ color: '#575757', fontWeight: 'bold', fontSize: 15 }}
+                    onPress={() => setModalVisible(true)}
+                >
+                    Esqueceu a senha?
+                </Button> */}
+
+                <Modal visible={modalVisible} transparent>
+                    <View style={styles.modalContainer}>
+                        <View style={styles.modalContent}>
+                            <Text>Informe seu e-mail para redefinir a senha</Text>
+                            <TextInput
+                                placeholder="E-mail"
+                                value={resetEmail}
+                                onChangeText={setResetEmail}
+                                style={styles.modalInput}
+                                keyboardType="email-address"
+                                autoCapitalize="none"
+                            />
+                            <Button
+                                mode="contained"
+                                style={styles.button}
+                                labelStyle={{ color: '#000', fontWeight: '500', fontSize: 18 }}
+                                onPress={solicitarResetSenha}
+                            >
+                                Enviar
+                            </Button>
+                            <Button
+                                labelStyle={{ color: '#000', fontWeight: '500', fontSize: 18 }}
+                                onPress={() => setModalVisible(false)}
+                            >
+                                Cancelar
+                            </Button>
+                        </View>
                     </View>
-                </View>
-            </Modal>
-        </View>
+                </Modal>
+            </ScrollView>
+        </KeyboardAvoidingView>
     );
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, padding: 20, justifyContent: 'center' },
-    title: { fontSize: 24, fontWeight: 'bold', marginBottom: 24, textAlign: 'center', color: '#28584B' },
-    input: { marginBottom: 16, backgroundColor: '#f0f0f0', borderColor: '#575757', borderWidth: 1 },
-    button: { marginVertical: 16, borderRadius: 10, backgroundColor: '#c8d7d3' },
-    logo: { width: 200, height: 180, alignSelf: 'center', marginTop: 10, marginBottom: 70 },
-    modalContainer: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' },
-    modalContent: { backgroundColor: '#fff', padding: 20, borderRadius: 10, width: '80%' },
-    modalInput: { marginBottom: 16, backgroundColor: '#f0f0f0', borderColor: '#575757', borderWidth: 1, marginTop: 8 }
+    container: { padding: 20, flexGrow: 1, justifyContent: 'center' },
+    title: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        marginBottom: 24,
+        textAlign: 'center',
+        color: '#28584B',
+    },
+    input: {
+        marginBottom: 16,
+        backgroundColor: '#f0f0f0',
+        borderColor: '#575757',
+        borderWidth: 1,
+    },
+    button: {
+        marginVertical: 16,
+        borderRadius: 10,
+        backgroundColor: '#c8d7d3',
+    },
+    logo: {
+        width: 200,
+        height: 180,
+        alignSelf: 'center',
+        marginTop: 10,
+        marginBottom: 70,
+    },
+    modalContainer: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalContent: {
+        backgroundColor: '#fff',
+        padding: 20,
+        borderRadius: 10,
+        width: '80%',
+    },
+    modalInput: {
+        marginBottom: 16,
+        backgroundColor: '#f0f0f0',
+        borderColor: '#575757',
+        borderWidth: 1,
+        marginTop: 8,
+    },
 });

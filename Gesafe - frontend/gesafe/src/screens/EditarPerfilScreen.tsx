@@ -89,6 +89,7 @@ export default function EditarPerfilScreen({ navigation }: any) {
 
             <Button
                 mode="contained"
+                icon={'content-save'}
                 labelStyle={{ color: '#000', fontWeight: '500', fontSize: 18 }}
                 onPress={handleSalvar}
                 loading={loading}

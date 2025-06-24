@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, SafeAreaView, ScrollView, StyleSheet } from 'react-native';
 import { Button, Text, TextInput } from 'react-native-paper';
+import CustomAppBar from '../components/CustomAppBar';
 import { api } from '../services/api';
 
 export default function RegisterScreen({ navigation }: any) {
@@ -54,64 +55,76 @@ export default function RegisterScreen({ navigation }: any) {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Criar Conta</Text>
-
-      <TextInput label="Nome" value={nome} onChangeText={setNome} style={styles.input} />
-      <TextInput
-        label="Email"
-        value={email}
-        onChangeText={(text) => {
-          setEmail(text);
-          setEmailError(''); // limpa erro enquanto digita
-        }}
-        style={styles.input}
-        keyboardType="email-address"
-        autoCapitalize="none"
-        error={!!emailError}
-      />
-      {emailError ? <Text style={styles.error}>{emailError}</Text> : null}
-
-      <TextInput label="Senha" value={senha} onChangeText={setSenha} secureTextEntry style={styles.input} />
-
-      <Text style={styles.subtitle}>Propriedades</Text>
-      {propriedades.map((prop, index) => (
-        <TextInput
-          key={index}
-          label={`Propriedade ${index + 1}`}
-          value={prop.nome}
-          onChangeText={(text) => atualizarPropriedade(index, text)}
-          style={styles.input}
-        />
-      ))}
-
-      <Button
-        mode="outlined"
-        icon='plus-circle-outline'
-        onPress={adicionarPropriedade}
-        labelStyle={{ color: '#575757', fontWeight: '500', fontSize: 20 }}
-        style={styles.button}
+    <SafeAreaView style={styles.container}>
+      <CustomAppBar navigation={navigation} />
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        Adicionar Propriedade
-      </Button>
+        <ScrollView
+          contentContainerStyle={[styles.formContainer]}
+          keyboardShouldPersistTaps="handled"
+        >
 
-      <Button
-        mode="elevated"
-        icon='content-save-outline'
-        onPress={handleCadastro}
-        loading={loading}
-        disabled={loading}
-        labelStyle={{ color: '#575757', fontWeight: '500', fontSize: 20 }}
-        style={styles.button}
-      >
-        Cadastrar
-      </Button>
-    </View>
+          <Text style={styles.title}>Criar Conta</Text>
+
+          <TextInput label="Nome" value={nome} onChangeText={setNome} style={styles.input} />
+          <TextInput
+            label="Email"
+            value={email}
+            onChangeText={(text) => {
+              setEmail(text);
+              setEmailError(''); // limpa erro enquanto digita
+            }}
+            style={styles.input}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            error={!!emailError}
+          />
+          {emailError ? <Text style={styles.error}>{emailError}</Text> : null}
+
+          <TextInput label="Senha" value={senha} onChangeText={setSenha} secureTextEntry style={styles.input} />
+
+          <Text style={styles.subtitle}>Propriedades</Text>
+          {propriedades.map((prop, index) => (
+            <TextInput
+              key={index}
+              label={`Propriedade ${index + 1}`}
+              value={prop.nome}
+              onChangeText={(text) => atualizarPropriedade(index, text.toUpperCase())}
+              style={styles.input}
+            />
+          ))}
+
+          <Button
+            mode="outlined"
+            icon='plus-circle-outline'
+            onPress={adicionarPropriedade}
+            labelStyle={{ color: '#575757', fontWeight: '500', fontSize: 20 }}
+            style={styles.button}
+          >
+            Adicionar Propriedade
+          </Button>
+
+          <Button
+            mode="elevated"
+            icon='content-save-outline'
+            onPress={handleCadastro}
+            loading={loading}
+            disabled={loading}
+            labelStyle={{ color: '#575757', fontWeight: '500', fontSize: 20 }}
+            style={styles.button}
+          >
+            Cadastrar
+          </Button>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, justifyContent: 'center' },
+  container: { flex: 1, backgroundColor: '#f5f5f5', padding: 12 },
   title: { fontSize: 24, fontWeight: 'bold', marginBottom: 24, textAlign: 'center' },
   subtitle: { fontSize: 16, fontWeight: 'bold', marginBottom: 8 },
   input: { marginBottom: 16, backgroundColor: '#f0f0f0', borderColor: '#575757', borderWidth: 1 },
@@ -121,4 +134,9 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     fontSize: 14,
   },
+  formContainer: {
+    flex: 1,
+    padding: 16,
+    justifyContent: 'center',
+  }
 });

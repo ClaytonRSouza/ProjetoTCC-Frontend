@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { FlatList, Modal, StyleSheet, View } from 'react-native';
-import { ActivityIndicator, Button, Card, IconButton, Menu, Text } from 'react-native-paper';
+import { Alert, FlatList, Modal, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Button, Card, IconButton, Text } from 'react-native-paper';
 import CustomAppBar from '../components/CustomAppBar';
-import { useAuth } from '../contexts/AuthContext';
+import FiltroPropriedadeSelector from '../components/FiltroPropriedadeSelector';
 import { api } from '../services/api';
 
 interface Propriedade {
@@ -22,45 +22,43 @@ interface Movimentacao {
 }
 
 export default function MovimentacoesScreen({ navigation }: any) {
-    const { token } = useAuth();
 
-    const [propriedades, setPropriedades] = useState<Propriedade[]>([]);
-    const [selectedPropriedade, setSelectedPropriedade] = useState<Propriedade | null>(null);
-
+    const [propriedadeId, setPropriedadeId] = useState<number | null>(null);
+    const [propriedadeSelecionada, setPropriedadeSelecionada] = useState<Propriedade | null>(null);;
     const [movimentacoes, setMovimentacoes] = useState<Movimentacao[]>([]);
     const [loading, setLoading] = useState(false);
-
     const [menuVisible, setMenuVisible] = useState(false);
-
     const [modalJustificativaVisible, setModalJustificativaVisible] = useState(false);
     const [justificativaSelecionada, setJustificativaSelecionada] = useState<string>('');
 
     useEffect(() => {
-        const fetchPropriedades = async () => {
+        const fetchAndSetDefaultPropriedade = async () => {
             try {
-                const res = await api.get('/auth/propriedades');
-                setPropriedades(res.data.propriedades);
-                if (res.data.propriedades.length > 0) {
-                    setSelectedPropriedade(res.data.propriedades[0]);
+                const response = await api.get('/auth/propriedades');
+                const fetchedPropriedades: Propriedade[] = response.data.propriedades;
+                // Se houver propriedades, seleciona a primeira como padrão
+                if (fetchedPropriedades.length > 0) {
+                    setPropriedadeSelecionada(fetchedPropriedades[0]);
+                    setPropriedadeId(fetchedPropriedades[0].id);
                 }
             } catch (error) {
-                console.error('Erro ao buscar propriedades:', error);
+                Alert.alert('Erro', 'Erro ao carregar propriedades.');
             }
         };
-        fetchPropriedades();
+        fetchAndSetDefaultPropriedade();
     }, []);
 
     useEffect(() => {
-        if (selectedPropriedade) {
+        if (propriedadeSelecionada) {
             fetchMovimentacoes();
         }
-    }, [selectedPropriedade]);
+    }, [propriedadeSelecionada]);
 
     const fetchMovimentacoes = async () => {
         try {
             setLoading(true);
             const res = await api.get(`/produto/relatorio-movimentacoes`, {
-                params: { propriedadeId: selectedPropriedade?.id }
+                params: { propriedadeId: propriedadeSelecionada?.id }
             });
             setMovimentacoes(res.data.relatorio);
         } catch (error) {
@@ -97,35 +95,11 @@ export default function MovimentacoesScreen({ navigation }: any) {
         <View style={styles.container}>
             <CustomAppBar navigation={navigation} />
 
-            <View style={styles.selectorWrapper}>
-                <Menu
-                    visible={menuVisible}
-                    onDismiss={() => setMenuVisible(false)}
-                    anchor={
-                        <Button
-                            mode="outlined"
-                            icon="chevron-down"
-                            contentStyle={{ flexDirection: 'row-reverse' }}
-                            onPress={() => setMenuVisible(true)}
-                            labelStyle={{ color: '#575757', fontWeight: 'bold', fontSize: 18 }}
-                            style={styles.selectorButton}
-                        >
-                            {selectedPropriedade?.nome || 'Selecionar propriedade'}
-                        </Button>
-                    }
-                >
-                    {propriedades.map((p) => (
-                        <Menu.Item
-                            key={p.id}
-                            onPress={() => {
-                                setSelectedPropriedade(p);
-                                setMenuVisible(false);
-                            }}
-                            title={p.nome}
-                        />
-                    ))}
-                </Menu>
-            </View>
+            <FiltroPropriedadeSelector
+                selected={propriedadeSelecionada}
+                onSelect={setPropriedadeSelecionada}
+                allowNull={false} // Define para false, removendo a opção "TODAS"
+            />
 
             {loading ? (
                 <ActivityIndicator animating style={styles.loader} />

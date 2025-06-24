@@ -3,55 +3,52 @@ import {
   Alert,
   ScrollView,
   StyleSheet,
-  TouchableOpacity,
-  View,
+  View
 } from 'react-native';
 import {
   Button,
-  IconButton,
-  Menu,
-  Text,
-  TextInput,
+  TextInput
 } from 'react-native-paper';
 import CustomAppBar from '../components/CustomAppBar';
+import FiltroMenuSelector from '../components/FiltroMenuSelector';
+import FiltroPropriedadeSelector from '../components/FiltroPropriedadeSelector';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
+import { embalagens } from '../utils/embalagens';
 
-export default function CadastrarProdutoScreen({ navigation }: any) {
+interface Propriedade {
+  id: number;
+  nome: string;
+}
+
+type CadastrarProdutoScreenProps = {
+  navigation: {
+    goBack: () => void;
+  };
+};
+
+export default function CadastrarProdutoScreen({ navigation }: CadastrarProdutoScreenProps) {
   const { token } = useAuth();
 
   const [nome, setNome] = useState('');
   const [quantidade, setQuantidade] = useState('');
   const [validade, setValidade] = useState('');
-  const [embalagem, setEmbalagem] = useState('');
+  const [embalagemSelecionada, setEmbalagemSelecionada] = useState<string | null>(null);
   const [propriedadeId, setPropriedadeId] = useState<number | null>(null);
-  const [propriedades, setPropriedades] = useState<{ id: number; nome: string }[]>([]);
+  const [propriedadeSelecionada, setPropriedadeSelecionada] = useState<Propriedade | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const [embalagemMenuVisible, setEmbalagemMenuVisible] = useState(false);
-  const [propriedadeMenuVisible, setPropriedadeMenuVisible] = useState(false);
 
-  const embalagens = [
-    'SACARIA', 'BAG_1TN', 'BAG_750KG', 'LITRO', 'GALAO_2L', 'GALAO_5L',
-    'GALAO_10L', 'BALDE_20L', 'TAMBOR_200L', 'IBC_1000L',
-    'PACOTE_1KG', 'PACOTE_5KG', 'PACOTE_10KG', 'PACOTE_15KG',
-    'PACOTE_500G', 'OUTROS',
-  ];
-
+  // atualiza o propriedadeId quando propriedadeSelecionada muda
   useEffect(() => {
-    const fetchPropriedades = async () => {
-      try {
-        const response = await api.get('/auth/propriedades');
-        setPropriedades(response.data.propriedades);
-        if (response.data.propriedades.length > 0) {
-          setPropriedadeId(response.data.propriedades[0].id);
-        }
-      } catch (error) {
-        Alert.alert('Erro', 'Erro ao carregar propriedades.');
-      }
-    };
-    fetchPropriedades();
-  }, []);
+    if (propriedadeSelecionada) {
+      setPropriedadeId(propriedadeSelecionada.id);
+    } else {
+      // a propriedade é obrigatória, então este else não deve ser atingido
+      setPropriedadeId(null);
+    }
+  }, [propriedadeSelecionada]);
+
 
   const getLastDayOfMonth = (month: number, year: number): number => {
     if ([4, 6, 9, 11].includes(month)) return 30; // Abril, Junho, Setembro, Novembro
@@ -72,7 +69,7 @@ export default function CadastrarProdutoScreen({ navigation }: any) {
       setValidade(`${String(diaFinal).padStart(2, '0')}/${String(mes).padStart(2, '0')}/${ano}`);
     }
 
-    // DDMMYYYY → formata
+    // DDMMYYYY → formatado
     else if (/^\d{8}$/.test(digits)) {
       const dia = digits.substring(0, 2);
       const mes = digits.substring(2, 4);
@@ -91,7 +88,7 @@ export default function CadastrarProdutoScreen({ navigation }: any) {
       isNaN(quantidadeNum) ||
       quantidadeNum <= 0 ||
       !validade.trim() ||
-      !embalagem ||
+      !embalagemSelecionada ||
       !propriedadeId
     ) {
       Alert.alert('Erro', 'Preencha todos os campos corretamente!');
@@ -102,7 +99,7 @@ export default function CadastrarProdutoScreen({ navigation }: any) {
       nome,
       quantidade: quantidadeNum,
       validade,
-      embalagem,
+      embalagem: embalagemSelecionada,
       propriedadeId,
     };
 
@@ -150,67 +147,19 @@ export default function CadastrarProdutoScreen({ navigation }: any) {
           style={styles.input}
         />
 
-        <View style={styles.dropdown}>
-          <Text style={styles.dropdownLabel}>Embalagem</Text>
-          <Menu
-            visible={embalagemMenuVisible}
-            onDismiss={() => setEmbalagemMenuVisible(false)}
-            anchor={
-              <TouchableOpacity
-                onPress={() => setEmbalagemMenuVisible(true)}
-                style={styles.dropdownAnchor}
-              >
-                <Text style={styles.dropdownText}>
-                  {embalagem ? embalagem.replace(/_/g, ' ') : 'Selecionar...'}
-                </Text>
-                <IconButton icon="menu-down" size={20} />
-              </TouchableOpacity>
-            }
-          >
-            {embalagens.map((item) => (
-              <Menu.Item
-                key={item}
-                onPress={() => {
-                  setEmbalagem(item);
-                  setEmbalagemMenuVisible(false);
-                }}
-                title={item.replace(/_/g, ' ')}
-              />
-            ))}
-          </Menu>
-        </View>
+        <FiltroMenuSelector
+          label="Embalagem"
+          valores={embalagens}
+          valorSelecionado={embalagemSelecionada}
+          onSelecionar={setEmbalagemSelecionada}
+          allowNull={false} // Define para false, removendo a opção "Nenhum filtro"
+        />
 
-        <View style={styles.dropdown}>
-          <Text style={styles.dropdownLabel}>Propriedade</Text>
-          <Menu
-            visible={propriedadeMenuVisible}
-            onDismiss={() => setPropriedadeMenuVisible(false)}
-            anchor={
-              <TouchableOpacity
-                onPress={() => setPropriedadeMenuVisible(true)}
-                style={styles.dropdownAnchor}
-              >
-                <Text style={styles.dropdownText}>
-                  {propriedadeId
-                    ? propriedades.find((p) => p.id === propriedadeId)?.nome
-                    : 'Selecionar...'}
-                </Text>
-                <IconButton icon="menu-down" size={20} />
-              </TouchableOpacity>
-            }
-          >
-            {propriedades.map((item) => (
-              <Menu.Item
-                key={item.id}
-                onPress={() => {
-                  setPropriedadeId(item.id);
-                  setPropriedadeMenuVisible(false);
-                }}
-                title={item.nome}
-              />
-            ))}
-          </Menu>
-        </View>
+        <FiltroPropriedadeSelector
+          selected={propriedadeSelecionada}
+          onSelect={setPropriedadeSelecionada}
+          allowNull={false} // Define para false, removendo a opção "TODAS"
+        />
 
         <Button
           mode="elevated"

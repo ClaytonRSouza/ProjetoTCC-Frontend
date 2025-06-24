@@ -4,11 +4,14 @@ import {
   Alert, FlatList, Modal, TextInput as RNTextInput, ScrollView, StyleSheet, TouchableOpacity, View
 } from 'react-native';
 import {
-  ActivityIndicator, Button, IconButton, Menu, Text
+  ActivityIndicator, Button, IconButton,
+  Text
 } from 'react-native-paper';
 import CustomAppBar from '../components/CustomAppBar';
+import FiltroPropriedadeSelector from '../components/FiltroPropriedadeSelector';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
+import { embalagens } from '../utils/embalagens';
 
 interface Produto {
   idEstoque: number;
@@ -29,30 +32,19 @@ export default function ProdutosScreen() {
   const { token } = useAuth();
   const navigation = useNavigation<any>();
   const isFocused = useIsFocused();
-
-  const [propriedades, setPropriedades] = useState<Propriedade[]>([]);
-  const [selectedPropriedade, setSelectedPropriedade] = useState<Propriedade | null>(null);
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [loading, setLoading] = useState(true);
-  const [menuVisible, setMenuVisible] = useState(false);
-
+  const [propriedadeId, setPropriedadeId] = useState<number | null>(null);
+  const [propriedadeSelecionada, setPropriedadeSelecionada] = useState<Propriedade | null>(null);
   const [saidaModalVisible, setSaidaModalVisible] = useState(false);
   const [produtoSaida, setProdutoSaida] = useState<Produto | null>(null);
   const [quantidadeSaida, setQuantidadeSaida] = useState('');
-
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [produtoEditando, setProdutoEditando] = useState<Produto | null>(null);
   const [editNome, setEditNome] = useState('');
   const [editValidade, setEditValidade] = useState('');
   const [editEmbalagem, setEditEmbalagem] = useState('');
-  const [embalagemMenuVisible, setEmbalagemMenuVisible] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
-  const embalagens = [
-    'SACARIA', 'BAG_1TN', 'BAG_750KG', 'LITRO', 'GALAO_2L', 'GALAO_5L',
-    'GALAO_10L', 'BALDE_20L', 'TAMBOR_200L', 'IBC_1000L',
-    'PACOTE_1KG', 'PACOTE_5KG', 'PACOTE_10KG', 'PACOTE_15KG',
-    'PACOTE_500G', 'OUTROS'
-  ];
 
   const [desativarModalVisible, setDesativarModalVisible] = useState(false);
   const [produtoDesativando, setProdutoDesativando] = useState<Produto | null>(null);
@@ -60,29 +52,31 @@ export default function ProdutosScreen() {
 
 
   useEffect(() => {
-    const fetchPropriedades = async () => {
+    const fetchAndSetDefaultPropriedade = async () => {
       try {
-        const res = await api.get('/auth/propriedades');
-        setPropriedades(res.data.propriedades);
-        if (res.data.propriedades.length > 0) {
-          setSelectedPropriedade(res.data.propriedades[0]);
+        const response = await api.get('/auth/propriedades');
+        const fetchedPropriedades: Propriedade[] = response.data.propriedades;
+        // Se houver propriedades, seleciona a primeira como padrão
+        if (fetchedPropriedades.length > 0) {
+          setPropriedadeSelecionada(fetchedPropriedades[0]);
+          setPropriedadeId(fetchedPropriedades[0].id);
         }
-      } catch (err) {
-        console.error('Erro ao buscar propriedades:', err);
+      } catch (error) {
+        Alert.alert('Erro', 'Erro ao carregar propriedades.');
       }
     };
-    fetchPropriedades();
+    fetchAndSetDefaultPropriedade();
   }, []);
 
   useEffect(() => {
     atualizarProdutos();
-  }, [selectedPropriedade]);
+  }, [propriedadeSelecionada]);
 
   const atualizarProdutos = async () => {
-    if (!selectedPropriedade) return;
+    if (!propriedadeSelecionada) return;
     try {
       setLoading(true);
-      const res = await api.get(`/produto/${selectedPropriedade.id}`);
+      const res = await api.get(`/produto/${propriedadeSelecionada.id}`);
       setProdutos(res.data.produtos);
     } catch (err) {
       console.error('Erro ao atualizar produtos:', err);
@@ -95,7 +89,7 @@ export default function ProdutosScreen() {
     try {
       await api.post('/produto/saida', {
         produtoId: produto.idProduto,
-        propriedadeId: selectedPropriedade?.id,
+        propriedadeId: propriedadeSelecionada?.id,
         quantidade: 1
       });
       Alert.alert('Sucesso', 'Saída registrada!');
@@ -116,7 +110,7 @@ export default function ProdutosScreen() {
   const confirmarEditar = async () => {
     if (!produtoEditando) return;
     try {
-      await api.put(`/produto/${selectedPropriedade?.id}/${produtoEditando.idProduto}`, {
+      await api.put(`/produto/${propriedadeSelecionada?.id}/${produtoEditando.idProduto}`, {
         nome: editNome,
         validade: editValidade,
         embalagem: editEmbalagem
@@ -145,7 +139,7 @@ export default function ProdutosScreen() {
     }
 
     try {
-      await api.patch(`/produto/movimentacao/${produtoDesativando.movimentacaoId}/${selectedPropriedade?.id}`, {
+      await api.patch(`/produto/movimentacao/${produtoDesativando.movimentacaoId}/${propriedadeSelecionada?.id}`, {
         justificativa
       });
       Alert.alert('Sucesso', 'Produto desativado!');
@@ -181,7 +175,7 @@ export default function ProdutosScreen() {
     try {
       await api.post('/produto/saida', {
         produtoId: produtoSaida.idProduto,
-        propriedadeId: selectedPropriedade?.id,
+        propriedadeId: propriedadeSelecionada?.id,
         quantidade: qtd
       });
       Alert.alert('Sucesso', 'Saída registrada!');
@@ -197,42 +191,17 @@ export default function ProdutosScreen() {
     if (isFocused) {
       atualizarProdutos();
     }
-  }, [isFocused, selectedPropriedade]);
+  }, [isFocused, propriedadeSelecionada]);
 
   return (
     <View style={styles.container}>
       <CustomAppBar navigation={navigation} />
 
-      <View style={styles.selectorWrapper}>
-        <Menu
-          visible={menuVisible}
-          onDismiss={() => setMenuVisible(false)}
-          anchor={
-            <Button
-              mode="outlined"
-              icon="chevron-down"
-              contentStyle={{ flexDirection: 'row-reverse' }}
-              onPress={() => setMenuVisible(true)}
-              labelStyle={{ color: '#575757', fontWeight: 'bold', fontSize: 18 }}
-              style={styles.selectorButton}
-            >
-              {selectedPropriedade?.nome || 'Selecionar propriedade'}
-            </Button>
-          }
-        >
-          {propriedades.map((p) => (
-            <Menu.Item
-              key={p.id}
-              onPress={() => {
-                setSelectedPropriedade(p);
-                setMenuVisible(false);
-              }}
-              title={p.nome}
-            />
-          ))}
-        </Menu>
-      </View>
-
+      <FiltroPropriedadeSelector
+        selected={propriedadeSelecionada}
+        onSelect={setPropriedadeSelecionada}
+        allowNull={false} // Define para false, removendo a opção "TODAS"
+      />
 
       <Button
         mode="elevated"

@@ -11,7 +11,7 @@ export default function CustomAppBar({ navigation }: Props) {
     const { signOut } = useAuth();
 
     return (
-        <SafeAreaView style={{ backgroundColor: 'white' }}>
+        <SafeAreaView style={{ backgroundColor: '#f5f5f5' }}>
             <View style={styles.appBar}>
                 <TouchableOpacity onPress={() => navigation.goBack()}>
                     <Appbar.BackAction />
