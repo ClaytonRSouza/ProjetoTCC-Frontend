@@ -1,6 +1,7 @@
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 
+//Define a interface para os itens do relatório
 interface RelatorioItem {
   propriedade: string;
   produto: string;
@@ -13,6 +14,7 @@ interface RelatorioItem {
   valorTotal?: string;
 }
 
+//Função para gerar o PDF do relatório e compartilhar o arquivo
 export async function gerarPdfRelatorio(titulo: string, dados: RelatorioItem[]) {
   // Agrupar por propriedade
   const agrupado = dados.reduce((acc, item) => {
@@ -21,6 +23,7 @@ export async function gerarPdfRelatorio(titulo: string, dados: RelatorioItem[]) 
     return acc;
   }, {} as Record<string, RelatorioItem[]>);
 
+  //Gera o HTML do relatório
   const html = `
   <html>
   <head>
@@ -67,6 +70,8 @@ export async function gerarPdfRelatorio(titulo: string, dados: RelatorioItem[]) 
   </html>
   `;
 
+  //Gera o PDF com base no HTML
   const { uri } = await Print.printToFileAsync({ html });
+  //Abre o menu de compartilhamento para o usuário compartilhar o PDF
   await Sharing.shareAsync(uri);
 }

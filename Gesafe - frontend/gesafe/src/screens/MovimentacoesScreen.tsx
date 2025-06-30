@@ -5,11 +5,13 @@ import CustomAppBar from '../components/CustomAppBar';
 import FiltroPropriedadeSelector from '../components/FiltroPropriedadeSelector';
 import { api } from '../services/api';
 
+//Interface para as propriedades
 interface Propriedade {
     id: number;
     nome: string;
 }
 
+//Interface para as movimentações
 interface Movimentacao {
     tipo: string;
     quantidade: number;
@@ -27,7 +29,6 @@ export default function MovimentacoesScreen({ navigation }: any) {
     const [propriedadeSelecionada, setPropriedadeSelecionada] = useState<Propriedade | null>(null);;
     const [movimentacoes, setMovimentacoes] = useState<Movimentacao[]>([]);
     const [loading, setLoading] = useState(false);
-    const [menuVisible, setMenuVisible] = useState(false);
     const [modalJustificativaVisible, setModalJustificativaVisible] = useState(false);
     const [justificativaSelecionada, setJustificativaSelecionada] = useState<string>('');
 
@@ -54,6 +55,7 @@ export default function MovimentacoesScreen({ navigation }: any) {
         }
     }, [propriedadeSelecionada]);
 
+    //função para buscar as movimentações
     const fetchMovimentacoes = async () => {
         try {
             setLoading(true);
@@ -68,6 +70,7 @@ export default function MovimentacoesScreen({ navigation }: any) {
         }
     };
 
+    //função para definir o icone de acordo com o tipo da movimentação
     const renderIcon = (tipo: string) => {
         switch (tipo) {
             case 'ENTRADA': return 'arrow-up-bold-circle';
@@ -77,6 +80,7 @@ export default function MovimentacoesScreen({ navigation }: any) {
         }
     };
 
+    //função para definir a cor do icone de acordo com o tipo da movimentação
     const renderIconColor = (tipo: string) => {
         switch (tipo) {
             case 'ENTRADA': return 'green';
@@ -86,6 +90,7 @@ export default function MovimentacoesScreen({ navigation }: any) {
         }
     };
 
+    //função para abrir o modal de justificativa
     const abrirJustificativa = (justificativa: string) => {
         setJustificativaSelecionada(justificativa);
         setModalJustificativaVisible(true);

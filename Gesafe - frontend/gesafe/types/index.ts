@@ -1,8 +1,10 @@
+//cria tipagem de propriedade
 export interface Propriedade {
     id: number;
     nome: string;
 }
 
+//cria tipagem de produto
 export interface Produto {
     nome: string;
     embalagem: string;
@@ -12,6 +14,7 @@ export interface Produto {
     vencido?: boolean;
 }
 
+//cria tipagem de movimentacao
 export interface Movimentacao {
     data: string;
     tipo: string;

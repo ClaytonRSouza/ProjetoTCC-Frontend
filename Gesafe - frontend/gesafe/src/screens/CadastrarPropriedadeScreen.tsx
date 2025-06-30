@@ -11,7 +11,9 @@ export default function CadastrarPropriedadeScreen() {
     const [loading, setLoading] = useState(false);
     const navigation = useNavigation<any>();
 
+    //Função para cadastrar a propriedade
     const handleCadastrar = async () => {
+        //Validação dos dados
         const parse = propriedadeSchema.safeParse({ nome });
 
         if (!parse.success) {
@@ -20,6 +22,7 @@ export default function CadastrarPropriedadeScreen() {
             return;
         }
 
+        //Cadastra a propriedade
         try {
             setLoading(true);
             await api.post('/auth/propriedade', { nome });

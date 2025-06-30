@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+//schema de validação do produto
 export const produtoSchema = z.object({
     nome: z.string().min(1, 'Nome é obrigatório').max(50, "Nome do produto deve ter no máximo 50 caracteres"),
     quantidade: z
@@ -14,6 +15,7 @@ export const produtoSchema = z.object({
     propriedadeId: z.number().min(1, 'Selecione uma propriedade'),
 });
 
+//schema de validação da edição do produto
 export const editarProdutoSchema = z.object({
     nome: z.string().min(1, 'Nome é obrigatório').max(50, "Nome do produto deve ter no máximo 50 caracteres"),
     validade: z.string().min(1, 'Validade é obrigatória'),
@@ -26,10 +28,12 @@ export const editarProdutoSchema = z.object({
     ], { errorMap: () => ({ message: 'Selecione uma embalagem válida' }) })
 });
 
+//schema de validação da desativação do produto
 export const desativarProdutoSchema = z.object({
     justificativa: z.string().min(10, "A justificativa é obrigatória e deve ter pelo menos 10 caracteres"),
 });
 
+//schema de validação da saída do produto
 export const saidaProdutoSchema = z.object({
     quantidade: z.coerce.number()
         .positive('Quantidade deve ser maior que zero')

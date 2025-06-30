@@ -14,10 +14,12 @@ export default function RelatorioVencimentosScreen({ navigation }: any) {
 
     const status = ["TODOS", "VENCIDO", "A VENCER"];
 
+    //Função para atualizar o estado do filtro
     useEffect(() => {
         fetchProdutos();
     }, [selectedPropriedade, selectedStatus]);
 
+    //Função para buscar os dados do relatório
     const fetchProdutos = async () => {
         const res = await api.get('/produto/alertas-vencimento');
         let lista = res.data.produtos;
@@ -35,6 +37,7 @@ export default function RelatorioVencimentosScreen({ navigation }: any) {
         setProdutos(lista);
     };
 
+    //Função para gerar o PDF do relatório
     const handleGerarPDF = () => {
         const dadosFormatados = produtos.flatMap((p) =>
             p.propriedades.map((prop: any) => ({

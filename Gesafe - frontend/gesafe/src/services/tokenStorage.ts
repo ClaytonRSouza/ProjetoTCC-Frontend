@@ -2,6 +2,7 @@ import * as SecureStore from 'expo-secure-store';
 
 const TOKEN_KEY = 'user_auth_token_gesafe';
 
+//função para salvar e recuperar o token do SecureStore
 export const saveTokenToSecureStore = async (token: string): Promise<void> => {
     try {
         await SecureStore.setItemAsync(TOKEN_KEY, token);
@@ -12,6 +13,7 @@ export const saveTokenToSecureStore = async (token: string): Promise<void> => {
     }
 };
 
+//função para recuperar o token do SecureStore
 export const getTokenFromSecureStore = async (): Promise<string | null> => {
     try {
         return await SecureStore.getItemAsync(TOKEN_KEY);
@@ -21,6 +23,7 @@ export const getTokenFromSecureStore = async (): Promise<string | null> => {
     }
 };
 
+//função para remover o token do SecureStore
 export const removeTokenFromSecureStore = async (): Promise<void> => {
     try {
         await SecureStore.deleteItemAsync(TOKEN_KEY);

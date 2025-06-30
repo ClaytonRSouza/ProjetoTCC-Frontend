@@ -17,10 +17,13 @@ export default function LoginScreen({ navigation }: any) {
     const [senha, setSenha] = useState('');
     const [loading, setLoading] = useState(false);
 
-    const [modalVisible, setModalVisible] = useState(false);
-    const [resetEmail, setResetEmail] = useState('');
+    //Função para solicitar reset de senha - em desenvolvimento
+    // const [modalVisible, setModalVisible] = useState(false);
+    // const [resetEmail, setResetEmail] = useState('');
 
+    //Função para fazer login
     const handleLogin = async () => {
+        //Validação dos dados
         const parse = loginSchema.safeParse({ email, senha });
 
         if (!parse.success) {
@@ -40,6 +43,7 @@ export default function LoginScreen({ navigation }: any) {
         }
     };
 
+    //Função para solicitar redefinição de senha - Em desenvolvimento
     // const solicitarResetSenha = async () => {
     //     if (!resetEmail.trim()) {
     //         Alert.alert('Erro', 'Informe um e-mail válido.');

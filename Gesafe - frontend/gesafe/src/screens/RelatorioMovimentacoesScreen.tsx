@@ -14,10 +14,12 @@ export default function RelatorioMovimentacoesScreen({ navigation }: any) {
 
     const tipos = ["ENTRADA", "SAIDA", "DESATIVACAO", "AJUSTE"];
 
+    //Função para atualizar o estado do filtro
     useEffect(() => {
         fetchRelatorio();
     }, [selectedTipo, selectedPropriedade]);
 
+    //Função para buscar os dados do relatório
     const fetchRelatorio = async () => {
         const params: any = {};
         if (selectedPropriedade) params.propriedadeId = selectedPropriedade.id;
@@ -26,6 +28,7 @@ export default function RelatorioMovimentacoesScreen({ navigation }: any) {
         setRelatorio(res.data.relatorio);
     };
 
+    //Função para gerar o PDF do relatório
     const handleGerarPDF = () => {
         const dadosFormatados = relatorio.map((m: any) => ({
             propriedade: m.propriedadeNome,

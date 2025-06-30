@@ -12,6 +12,7 @@ import RelatorioMovimentacoesScreen from '../screens/RelatorioMovimentacoesScree
 import RelatoriosScreen from '../screens/RelatoriosScreen';
 import RelatorioVencimentosScreen from '../screens/RelatorioVencimentosScreen';
 
+//criação do stack para rotas com autenticação requerida
 const Stack = createNativeStackNavigator();
 
 export default function AppStack() {

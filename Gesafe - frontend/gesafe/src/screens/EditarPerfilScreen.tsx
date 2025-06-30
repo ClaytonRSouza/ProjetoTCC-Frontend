@@ -8,9 +8,7 @@ import { api } from '../services/api';
 
 
 export default function EditarPerfilScreen({ navigation }: any) {
-    const { token } = useAuth();
-    const { atualizarPerfil } = useAuth();
-
+    const { atualizarPerfil } = useAuth(); //Função para atualizar o perfil após a edição
     const [nome, setNome] = useState('');
     const [email, setEmail] = useState('');
     const [emailError, setEmailError] = useState('');
@@ -20,6 +18,7 @@ export default function EditarPerfilScreen({ navigation }: any) {
         fetchPerfil();
     }, []);
 
+    //Função para buscar os dados do perfil
     const fetchPerfil = async () => {
         try {
             const res = await api.get('/auth/perfil');
@@ -31,12 +30,9 @@ export default function EditarPerfilScreen({ navigation }: any) {
         }
     };
 
-    const validarEmail = (email: string) => {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
-    };
-
+    //Função para atualizar os dados perfil
     const handleSalvar = async () => {
+        //Validação dos dados
         const parse = editarPerfilSchema.safeParse({ nome, email });
 
         if (!parse.success) {
@@ -45,7 +41,9 @@ export default function EditarPerfilScreen({ navigation }: any) {
             return;
         }
 
+
         try {
+            //Atualização dos dados do perfil
             setLoading(true);
             await api.put('/auth/perfil', { nome, email });
             await atualizarPerfil();

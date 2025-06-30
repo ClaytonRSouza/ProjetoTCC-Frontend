@@ -13,20 +13,19 @@ export default function RegisterScreen({ navigation }: any) {
   const [propriedades, setPropriedades] = useState([{ nome: '' }]);
   const [loading, setLoading] = useState(false);
 
+  //função para adicionar uma nova propriedade
   const adicionarPropriedade = () => setPropriedades([...propriedades, { nome: '' }]);
 
+  //função para atualizar a propriedade
   const atualizarPropriedade = (index: number, nome: string) => {
     const atualizado = [...propriedades];
     atualizado[index].nome = nome;
     setPropriedades(atualizado);
   };
 
-  const validarEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
-
+  //Função para cadastrar o usuário
   const handleCadastro = async () => {
+    // Validação dos campos
     const parse = registerSchema.safeParse({
       nome,
       email,
@@ -78,7 +77,7 @@ export default function RegisterScreen({ navigation }: any) {
             value={email}
             onChangeText={(text) => {
               setEmail(text);
-              setEmailError(''); // limpa erro enquanto digita
+              setEmailError('');
             }}
             style={styles.input}
             keyboardType="email-address"

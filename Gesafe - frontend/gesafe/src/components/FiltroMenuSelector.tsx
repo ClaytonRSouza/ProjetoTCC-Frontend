@@ -9,12 +9,13 @@ import {
 } from 'react-native';
 import { IconButton } from 'react-native-paper';
 
+// Interface para definir as propriedades do componente
 interface Props {
     label: string;
     valores: string[];
     valorSelecionado: string | null;
     onSelecionar: (valor: string | null) => void;
-    // Nova propriedade para controlar se a opção nula é permitida
+    //propriedade para controlar se a opção nula é permitida
     allowNull?: boolean;
 }
 

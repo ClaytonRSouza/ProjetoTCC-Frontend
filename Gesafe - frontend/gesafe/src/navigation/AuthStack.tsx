@@ -9,6 +9,7 @@ export type AuthStackParamList = {
     Register: undefined;
 };
 
+//criação do stack para rotas sem autenticação requerida
 const Stack = createNativeStackNavigator<AuthStackParamList>();
 
 export default function AuthStack() {

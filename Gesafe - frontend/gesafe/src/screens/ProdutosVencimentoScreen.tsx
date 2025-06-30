@@ -4,6 +4,7 @@ import { ActivityIndicator, Card, Text } from 'react-native-paper';
 import CustomAppBar from '../components/CustomAppBar';
 import { api } from '../services/api';
 
+// Define o tipo para os produtos
 interface ProdutoVencimento {
     id: number;
     nome: string;
@@ -20,6 +21,7 @@ export default function ProdutosVencimentoScreen({ navigation }: any) {
     const [produtos, setProdutos] = useState<ProdutoVencimento[]>([]);
     const [loading, setLoading] = useState(false);
 
+    // Função para buscar os produtos vencidos ou próx. ao vencimento
     const fetchProdutos = async () => {
         try {
             setLoading(true);
@@ -32,6 +34,7 @@ export default function ProdutosVencimentoScreen({ navigation }: any) {
         }
     };
 
+    //atualiza os produtos quando a tela é focada
     useEffect(() => {
         fetchProdutos();
     }, []);

@@ -7,6 +7,7 @@ import {
     saveTokenToSecureStore,
 } from '../services/tokenStorage';
 
+//defijne os tipos de dados que serão utilizados no contexto
 interface AuthContextType {
     token: string | null;
     isAuthenticated: boolean;
@@ -17,6 +18,7 @@ interface AuthContextType {
     atualizarPerfil: () => Promise<void>;
 }
 
+//cria o contexto
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -24,12 +26,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [userName, setUserName] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
+    //função para atualizar o perfil do usuário
     useEffect(() => {
         const initializeAuth = async () => {
             try {
                 const storedToken = await getTokenFromSecureStore();
                 console.log('Token recuperado do SecureStore:', storedToken);
 
+                // Verifica se o token existe
                 if (storedToken) {
                     setToken(storedToken);
                     api.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
@@ -45,6 +49,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         initializeAuth();
     }, []);
 
+    //verifica se o token existe e atualiza o header da api
     useEffect(() => {
         if (token) {
             api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
@@ -55,6 +60,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
     }, [token]);
 
+    //função para realizar o login
     const signIn = async (email: string, senha: string) => {
         setIsLoading(true);
         try {
@@ -64,11 +70,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
             if (!receivedToken) throw new Error('Token ausente da resposta');
 
+            //salva o token no secure store
             await saveTokenToSecureStore(receivedToken);
             setToken(receivedToken);
 
+            //chama função para atualizar perfil
             await atualizarPerfil();
 
+            //chama função para verificar produtos a vencer
             await verificarProdutosAVencer();
 
             console.log('Login realizado com sucesso. Token salvo.');
@@ -81,6 +90,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
     };
 
+    //atualiza o estado do nome do usuário
     const atualizarPerfil = async () => {
         if (!token) return;
         try {
@@ -92,6 +102,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
     };
 
+    //verifica se existem produtos a vencer
     const verificarProdutosAVencer = async () => {
         try {
             const res = await api.get('/produto/alertas-vencimento');
@@ -109,6 +120,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
     };
 
+    //função para realizar o logout
     const signOut = async () => {
         try {
             await removeTokenFromSecureStore();

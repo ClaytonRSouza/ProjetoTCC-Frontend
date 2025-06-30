@@ -9,10 +9,10 @@ import {
 } from 'react-native-paper';
 import CustomAppBar from '../components/CustomAppBar';
 import FiltroPropriedadeSelector from '../components/FiltroPropriedadeSelector';
-import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
 import { embalagens } from '../utils/embalagens';
 
+// Define o tipo para os produtos
 interface Produto {
   idEstoque: number;
   idProduto: number;
@@ -23,17 +23,20 @@ interface Produto {
   movimentacaoId: number | null;
 }
 
+// Define o tipo para as propriedades
 interface Propriedade {
   id: number;
   nome: string;
 }
 
+//Função para puxar o dia final do mês
 function getLastDayOfMonth(month: number, year: number): number {
   if ([4, 6, 9, 11].includes(month)) return 30;
   if (month === 2) return ((year % 4 === 0 && year % 100 !== 0) || year % 400 === 0) ? 29 : 28;
   return 31;
 }
 
+// Função para formatar a data de validade
 function formatarValidadeInput(text: string, valorAtual: string): string {
   const digits = text.replace(/[^\d]/g, '');
 
@@ -69,7 +72,6 @@ function formatarValidadeInput(text: string, valorAtual: string): string {
 
 
 export default function ProdutosScreen() {
-  const { token } = useAuth();
   const navigation = useNavigation<any>();
   const isFocused = useIsFocused();
   const [produtos, setProdutos] = useState<Produto[]>([]);
@@ -90,8 +92,8 @@ export default function ProdutosScreen() {
   const [produtoDesativando, setProdutoDesativando] = useState<Produto | null>(null);
   const [justificativa, setJustificativa] = useState('');
 
-
   useEffect(() => {
+    // Função para buscar as propriedade 
     const fetchAndSetDefaultPropriedade = async () => {
       try {
         const response = await api.get('/auth/propriedades');
@@ -108,10 +110,12 @@ export default function ProdutosScreen() {
     fetchAndSetDefaultPropriedade();
   }, []);
 
+  //Função para atualizar os produtos quando a propriedade selecionada mudar
   useEffect(() => {
     atualizarProdutos();
   }, [propriedadeSelecionada]);
 
+  //Função para buscar os produtos da propriedade selecionada
   const atualizarProdutos = async () => {
     if (!propriedadeSelecionada) return;
     try {
@@ -125,6 +129,7 @@ export default function ProdutosScreen() {
     }
   };
 
+  //função para abrir o modal de editar
   const abrirEditar = (produto: Produto) => {
     setProdutoEditando(produto);
     setEditNome(produto.nome);
@@ -133,6 +138,7 @@ export default function ProdutosScreen() {
     setEditModalVisible(true);
   };
 
+  //Função para confirmar a edição
   const confirmarEditar = async () => {
     if (!produtoEditando) return;
     try {
@@ -143,6 +149,7 @@ export default function ProdutosScreen() {
       });
 
       Alert.alert('Sucesso', 'Produto editado!');
+      setEditModalVisible(false);
       atualizarProdutos();
     } catch (error: any) {
       const status = error.response?.status;
@@ -164,13 +171,14 @@ export default function ProdutosScreen() {
     }
   };
 
-
+  //Função para abrir o modal de desativação
   const abrirModalDesativar = (produto: Produto) => {
     setProdutoDesativando(produto);
     setJustificativa('');
     setDesativarModalVisible(true);
   };
 
+  //Função para confirmar a desativação
   const confirmarDesativacao = async () => {
     if (!produtoDesativando) return;
 
@@ -185,6 +193,7 @@ export default function ProdutosScreen() {
       });
 
       Alert.alert('Sucesso', 'Produto desativado!');
+      setDesativarModalVisible(false);
       atualizarProdutos();
     } catch (error: any) {
       const status = error.response?.status;
@@ -206,12 +215,14 @@ export default function ProdutosScreen() {
     }
   };
 
+  //Função para abrir o modal de saída
   const abrirModalSaida = (produto: Produto) => {
     setProdutoSaida(produto);
     setQuantidadeSaida('');
     setSaidaModalVisible(true);
   };
 
+  //Função para confirmar a saída
   const confirmarSaida = async () => {
     if (!produtoSaida) return;
 
@@ -241,6 +252,7 @@ export default function ProdutosScreen() {
     }
   };
 
+  //Atualizar os produtos sempre que a tela for focada ou propriedade mudar 
   useEffect(() => {
     if (isFocused) {
       atualizarProdutos();

@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import AppStack from './AppStack';
 import AuthStack from './AuthStack';
 
+//verifica qual stack deve ser renderizado com base no estado de autenticação
 export default function RootNavigator() {
     const { isAuthenticated, isLoading } = useAuth();
 

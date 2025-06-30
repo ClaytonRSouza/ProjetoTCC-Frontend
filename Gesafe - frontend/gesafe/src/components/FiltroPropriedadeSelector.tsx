@@ -15,10 +15,11 @@ interface Propriedade {
     nome: string;
 }
 
+// Interface para definir as propriedades do componente
 interface Props {
     selected: Propriedade | null;
     onSelect: (p: Propriedade | null) => void;
-    // Nova propriedade para controlar se a opção nula é permitida
+    //propriedade para controlar se a opção nula é permitida
     allowNull?: boolean;
 }
 
@@ -26,6 +27,7 @@ export default function FiltroPropriedadeSelector({ selected, onSelect, allowNul
     const [visible, setVisible] = useState(false);
     const [propriedades, setPropriedades] = useState<Propriedade[]>([]);
 
+    // Carrega as propriedades do servidor
     useEffect(() => {
         api.get('/auth/propriedades')
             .then(res => setPropriedades(res.data.propriedades))

@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
 import CustomAppBar from './CustomAppBar';
 
+//define o tipo das props que o componente vai receber
 interface Props {
     navigation: any;
     titulo: string;

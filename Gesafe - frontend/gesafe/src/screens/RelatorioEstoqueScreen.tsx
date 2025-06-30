@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Button, Text } from 'react-native-paper';
-
 import FiltroMenuSelector from '../components/FiltroMenuSelector';
 import FiltroPropriedadeSelector from '../components/FiltroPropriedadeSelector';
 import RelatorioLayout from '../components/RelatorioLayout';
 import { api } from '../services/api';
+import { embalagens } from '../utils/embalagens';
 import { gerarPdfRelatorio } from '../utils/gerarPdfRelatorio';
 
+// Interface para representar um produto
 interface Produto {
     nome: string;
     quantidade: number;
@@ -15,6 +16,7 @@ interface Produto {
     embalagem: string;
 }
 
+// Interface para representar uma propriedade
 interface Propriedade {
     id: number;
     nome: string;
@@ -25,17 +27,12 @@ export default function RelatorioEstoqueScreen({ navigation }: any) {
     const [selectedPropriedade, setSelectedPropriedade] = useState<Propriedade | null>(null);
     const [selectedEmbalagem, setSelectedEmbalagem] = useState<string | null>(null);
 
-    const embalagens = [
-        'SACARIA', 'BAG_1TN', 'BAG_750KG', 'LITRO', 'GALAO_2L', 'GALAO_5L',
-        'GALAO_10L', 'BALDE_20L', 'TAMBOR_200L', 'IBC_1000L',
-        'PACOTE_1KG', 'PACOTE_5KG', 'PACOTE_10KG', 'PACOTE_15KG',
-        'PACOTE_500G', 'OUTROS'
-    ];
-
+    //Função para atualizar o estado do filtro
     useEffect(() => {
         fetchRelatorio();
     }, [selectedPropriedade, selectedEmbalagem]);
 
+    //Função para buscar os dados do relatório
     const fetchRelatorio = async () => {
         const params: any = {};
         if (selectedPropriedade) params.propriedadeId = selectedPropriedade.id;
@@ -43,6 +40,7 @@ export default function RelatorioEstoqueScreen({ navigation }: any) {
         setRelatorio(res.data.relatorio);
     };
 
+    //Função para gerar o PDF do relatório
     const handleGerarPDF = () => {
         const dadosFormatados = Object.entries(relatorio).flatMap(([propriedadeNome, produtos]) =>
             produtos

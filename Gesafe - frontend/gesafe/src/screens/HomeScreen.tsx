@@ -11,6 +11,7 @@ export default function HomeScreen() {
     const isFocused = useIsFocused();
     const [menuVisible, setMenuVisible] = useState(false);
 
+    //Atualiza o nome do usuário na tela quando ela é carregada
     useEffect(() => {
         if (isFocused) {
             atualizarPerfil();
@@ -28,6 +29,7 @@ export default function HomeScreen() {
                     resizeMode="contain"
                 />
 
+                {/* Botão de menu */}
                 <Menu
                     visible={menuVisible}
                     onDismiss={() => setMenuVisible(false)}
@@ -39,6 +41,7 @@ export default function HomeScreen() {
                         />
                     }
                 >
+                    {/* Abrir tela de editar perfil */}
                     <Menu.Item
                         onPress={() => {
                             setMenuVisible(false);
@@ -47,6 +50,7 @@ export default function HomeScreen() {
                         title="Editar Perfil"
                         leadingIcon="account-edit"
                     />
+                    {/* Sair do app */}
                     <Menu.Item
                         onPress={() => {
                             setMenuVisible(false);
@@ -58,11 +62,13 @@ export default function HomeScreen() {
                 </Menu>
             </Appbar.Header>
 
+            {/* Apresenta nome do usuário logado */}
             <Text style={styles.greeting}>
                 Olá, <Text style={styles.bold}>{userName || 'Usuário'}</Text>
             </Text>
 
             <View style={styles.optionsContainer}>
+                {/* Card de Produtos*/}
                 <Card style={styles.optionCard} onPress={() => navigation.navigate('Produtos')}>
                     <Card.Content style={styles.cardContent}>
                         <Image source={require('../assets/ic_produtos.png')} style={styles.icon} />
@@ -70,6 +76,7 @@ export default function HomeScreen() {
                     </Card.Content>
                 </Card>
 
+                {/* Card de Movimentações */}
                 <Card style={styles.optionCard} onPress={() => navigation.navigate('Movimentacoes')}>
                     <Card.Content style={styles.cardContent}>
                         <Image source={require('../assets/ic_movimentacoes.png')} style={styles.icon} />
@@ -77,6 +84,7 @@ export default function HomeScreen() {
                     </Card.Content>
                 </Card>
 
+                {/* Card de Vencimentos */}
                 <Card style={styles.optionCard} onPress={() => navigation.navigate('ProdutosVencimento')}>
                     <Card.Content style={styles.cardContent}>
                         <Image source={require('../assets/ic_vencimentos.png')} style={styles.icon} />
@@ -84,6 +92,7 @@ export default function HomeScreen() {
                     </Card.Content>
                 </Card>
 
+                {/* Card de Relatórios */}
                 <Card style={styles.optionCard} onPress={() => navigation.navigate('Relatorios')}>
                     <Card.Content style={styles.cardContent}>
                         <Image source={require('../assets/ic_relatorios.png')} style={styles.icon} />
@@ -91,6 +100,7 @@ export default function HomeScreen() {
                     </Card.Content>
                 </Card>
 
+                {/* Card de Propriedades */}
                 <Card style={styles.optionCard} onPress={() => navigation.navigate('CadastrarPropriedade')}>
                     <Card.Content style={styles.cardContent}>
                         <Image source={require('../assets/ic_propriedade.png')} style={styles.icon} />

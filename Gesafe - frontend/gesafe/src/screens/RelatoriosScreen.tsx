@@ -3,6 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { Card } from 'react-native-paper';
 import CustomAppBar from '../components/CustomAppBar';
 
+//Tela de relatórios
 export default function RelatoriosScreen() {
     const navigation = useNavigation<any>();
 

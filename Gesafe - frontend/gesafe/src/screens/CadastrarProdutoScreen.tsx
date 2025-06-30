@@ -12,15 +12,16 @@ import {
 import CustomAppBar from '../components/CustomAppBar';
 import FiltroMenuSelector from '../components/FiltroMenuSelector';
 import FiltroPropriedadeSelector from '../components/FiltroPropriedadeSelector';
-import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
 import { embalagens } from '../utils/embalagens';
 
+//Cria a interface para a propriedade
 interface Propriedade {
   id: number;
   nome: string;
 }
 
+//cria a tipagem utilizada no navigation
 type CadastrarProdutoScreenProps = {
   navigation: {
     goBack: () => void;
@@ -28,8 +29,6 @@ type CadastrarProdutoScreenProps = {
 };
 
 export default function CadastrarProdutoScreen({ navigation }: CadastrarProdutoScreenProps) {
-  const { token } = useAuth();
-
   const [nome, setNome] = useState('');
   const [quantidade, setQuantidade] = useState('');
   const [validade, setValidade] = useState('');
@@ -49,7 +48,7 @@ export default function CadastrarProdutoScreen({ navigation }: CadastrarProdutoS
     }
   }, [propriedadeSelecionada]);
 
-
+  // função para obter o último dia do mês
   const getLastDayOfMonth = (month: number, year: number): number => {
     if ([4, 6, 9, 11].includes(month)) return 30; // Abril, Junho, Setembro, Novembro
     if (month === 2) {
@@ -58,6 +57,7 @@ export default function CadastrarProdutoScreen({ navigation }: CadastrarProdutoS
     return 31;
   };
 
+  // função para tratar a entrada da data de validade
   const handleValidadeInput = (text: string) => {
     const digits = text.replace(/[^\d]/g, '');
 
@@ -102,7 +102,7 @@ export default function CadastrarProdutoScreen({ navigation }: CadastrarProdutoS
     setValidade(text);
   };
 
-
+  // função para cadastrar o produto
   const handleCadastrar = async () => {
     if (
       !nome.trim() ||
@@ -117,6 +117,7 @@ export default function CadastrarProdutoScreen({ navigation }: CadastrarProdutoS
 
     const quantidadeNum = Number(quantidade);
 
+    // cria o payload para enviar para a API
     const payload = {
       nome,
       quantidade: quantidadeNum,
