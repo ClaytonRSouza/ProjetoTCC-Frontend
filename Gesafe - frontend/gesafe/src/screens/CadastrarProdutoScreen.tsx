@@ -81,12 +81,9 @@ export default function CadastrarProdutoScreen({ navigation }: CadastrarProdutoS
   };
 
   const handleCadastrar = async () => {
-    const quantidadeNum = parseInt(quantidade);
-
     if (
       !nome.trim() ||
-      isNaN(quantidadeNum) ||
-      quantidadeNum <= 0 ||
+      !quantidade.trim() ||
       !validade.trim() ||
       !embalagemSelecionada ||
       !propriedadeId
@@ -94,6 +91,8 @@ export default function CadastrarProdutoScreen({ navigation }: CadastrarProdutoS
       Alert.alert('Erro', 'Preencha todos os campos corretamente!');
       return;
     }
+
+    const quantidadeNum = Number(quantidade);
 
     const payload = {
       nome,
@@ -109,11 +108,25 @@ export default function CadastrarProdutoScreen({ navigation }: CadastrarProdutoS
       Alert.alert('Sucesso', 'Produto cadastrado com sucesso!');
       navigation.goBack();
     } catch (error: any) {
-      Alert.alert('Erro', error.response?.data?.error || 'Erro ao cadastrar o produto.');
+      const status = error.response?.status;
+
+      if (status === 400 && Array.isArray(error.response?.data?.erros)) {
+        const mensagens = error.response.data.erros.map(
+          (err: { campo: string; mensagem: string }) =>
+            `${err.mensagem}.`
+        ).join('\n');
+
+        Alert.alert('Erro de validação', mensagens);
+      } else {
+        // loga apenas erros críticos
+        console.error('Erro inesperado:', error);
+        Alert.alert('Erro', error.response?.data?.error || 'Erro ao cadastrar o produto.');
+      }
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <View style={styles.container}>

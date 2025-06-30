@@ -113,16 +113,31 @@ export default function ProdutosScreen() {
       await api.put(`/produto/${propriedadeSelecionada?.id}/${produtoEditando.idProduto}`, {
         nome: editNome,
         validade: editValidade,
-        embalagem: editEmbalagem
+        embalagem: editEmbalagem,
       });
+
       Alert.alert('Sucesso', 'Produto editado!');
       atualizarProdutos();
-    } catch (err: any) {
-      Alert.alert('Erro', err.response?.data?.error || 'Erro ao editar produto');
+    } catch (error: any) {
+      const status = error.response?.status;
+
+      if (status === 400 && Array.isArray(error.response?.data?.erros)) {
+        const mensagens = error.response.data.erros.map(
+          (err: { campo: string; mensagem: string }) =>
+            `${err.mensagem}.`
+        ).join('\n');
+
+        Alert.alert('Erro de validação', mensagens);
+      } else {
+        // loga apenas erros críticos
+        console.error('Erro inesperado:', error);
+        Alert.alert('Erro', error.response?.data?.error || 'Erro ao cadastrar o produto.');
+      }
     } finally {
-      setEditModalVisible(false);
+      setLoading(false);
     }
   };
+
 
   const abrirModalDesativar = (produto: Produto) => {
     setProdutoDesativando(produto);
@@ -140,15 +155,28 @@ export default function ProdutosScreen() {
 
     try {
       await api.patch(`/produto/movimentacao/${produtoDesativando.movimentacaoId}/${propriedadeSelecionada?.id}`, {
-        justificativa
+        justificativa,
       });
+
       Alert.alert('Sucesso', 'Produto desativado!');
       atualizarProdutos();
-    } catch (err: any) {
-      console.error('Erro ao desativar produto:', err);
-      Alert.alert('Erro', err.response?.data?.error || 'Erro ao desativar produto');
+    } catch (error: any) {
+      const status = error.response?.status;
+
+      if (status === 400 && Array.isArray(error.response?.data?.erros)) {
+        const mensagens = error.response.data.erros.map(
+          (err: { campo: string; mensagem: string }) =>
+            `${err.mensagem}.`
+        ).join('\n');
+
+        Alert.alert('Erro de validação', mensagens);
+      } else {
+        // loga apenas erros críticos
+        console.error('Erro inesperado:', error);
+        Alert.alert('Erro', error.response?.data?.error || 'Erro ao cadastrar o produto.');
+      }
     } finally {
-      setDesativarModalVisible(false);
+      setLoading(false);
     }
   };
 

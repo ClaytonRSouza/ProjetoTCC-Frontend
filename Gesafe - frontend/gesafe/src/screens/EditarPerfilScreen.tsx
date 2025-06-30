@@ -3,6 +3,7 @@ import { Alert, StyleSheet, View } from 'react-native';
 import { Button, Text, TextInput } from 'react-native-paper';
 import CustomAppBar from '../components/CustomAppBar';
 import { useAuth } from '../contexts/AuthContext';
+import { editarPerfilSchema } from '../schemas/userSchema';
 import { api } from '../services/api';
 
 
@@ -36,13 +37,11 @@ export default function EditarPerfilScreen({ navigation }: any) {
     };
 
     const handleSalvar = async () => {
-        if (!nome || !email) {
-            Alert.alert('Erro', 'Preencha todos os campos.');
-            return;
-        }
+        const parse = editarPerfilSchema.safeParse({ nome, email });
 
-        if (!validarEmail(email)) {
-            setEmailError('O email deve ser válido');
+        if (!parse.success) {
+            const msg = parse.error.issues.map(issue => issue.message).join('\n');
+            Alert.alert('Erro', msg);
             return;
         }
 

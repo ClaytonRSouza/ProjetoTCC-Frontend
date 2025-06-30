@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, SafeAreaView, ScrollView, StyleSheet } from 'react-native';
 import { Button, Text, TextInput } from 'react-native-paper';
 import CustomAppBar from '../components/CustomAppBar';
+import { registerSchema } from '../schemas/userSchema';
 import { api } from '../services/api';
 
 export default function RegisterScreen({ navigation }: any) {
@@ -26,13 +27,16 @@ export default function RegisterScreen({ navigation }: any) {
   };
 
   const handleCadastro = async () => {
-    if (!nome || !email || !senha || propriedades.some(p => !p.nome)) {
-      Alert.alert('Erro', 'Preencha todos os campos e ao menos uma propriedade.');
-      return;
-    }
+    const parse = registerSchema.safeParse({
+      nome,
+      email,
+      senha,
+      propriedades,
+    });
 
-    if (!validarEmail(email)) {
-      setEmailError('O email deve ser válido');
+    if (!parse.success) {
+      const msg = parse.error.issues.map(issue => issue.message).join('\n');
+      Alert.alert('Erro', msg);
       return;
     }
 

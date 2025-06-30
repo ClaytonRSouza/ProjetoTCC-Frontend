@@ -3,15 +3,13 @@ import {
     Alert,
     Image,
     KeyboardAvoidingView,
-    Modal,
     Platform,
     ScrollView,
-    StyleSheet,
-    View,
+    StyleSheet
 } from 'react-native';
 import { Button, Text, TextInput } from 'react-native-paper';
 import { useAuth } from '../contexts/AuthContext';
-import { api } from '../services/api';
+import { loginSchema } from '../schemas/userSchema';
 
 export default function LoginScreen({ navigation }: any) {
     const { signIn } = useAuth();
@@ -23,8 +21,11 @@ export default function LoginScreen({ navigation }: any) {
     const [resetEmail, setResetEmail] = useState('');
 
     const handleLogin = async () => {
-        if (!email || !senha) {
-            Alert.alert('Erro', 'Preencha todos os campos.');
+        const parse = loginSchema.safeParse({ email, senha });
+
+        if (!parse.success) {
+            const msg = parse.error.issues.map(issue => issue.message).join('\n');
+            Alert.alert('Erro', msg);
             return;
         }
 
@@ -39,21 +40,21 @@ export default function LoginScreen({ navigation }: any) {
         }
     };
 
-    const solicitarResetSenha = async () => {
-        if (!resetEmail) {
-            Alert.alert('Erro', 'Informe o e-mail.');
-            return;
-        }
+    // const solicitarResetSenha = async () => {
+    //     if (!resetEmail.trim()) {
+    //         Alert.alert('Erro', 'Informe um e-mail válido.');
+    //         return;
+    //     }
 
-        try {
-            await api.post('/auth/solicitar-reset-senha', { email: resetEmail });
-            Alert.alert('Sucesso', 'E-mail de redefinição enviado!');
-            setModalVisible(false);
-        } catch (err: any) {
-            console.error('Erro:', err);
-            Alert.alert('Erro', 'Não foi possível enviar e-mail de redefinição.');
-        }
-    };
+    //     try {
+    //         await api.post('/auth/solicitar-reset-senha', { email: resetEmail.trim() });
+    //         Alert.alert('Sucesso', 'Um link de redefinição foi enviado para seu e-mail.');
+    //         setModalVisible(false);
+    //     } catch (err: any) {
+    //         console.error('Erro ao solicitar redefinição:', err);
+    //         Alert.alert('Erro', err.response?.data?.error || 'Erro ao solicitar redefinição de senha.');
+    //     }
+    // };
 
     return (
         <KeyboardAvoidingView
@@ -105,6 +106,8 @@ export default function LoginScreen({ navigation }: any) {
                     Não tem conta? Criar agora
                 </Button>
 
+
+                {/* Reset da senha - Em desenvolvimento*/}
                 {/* <Button
                     labelStyle={{ color: '#575757', fontWeight: 'bold', fontSize: 15 }}
                     onPress={() => setModalVisible(true)}
@@ -112,7 +115,7 @@ export default function LoginScreen({ navigation }: any) {
                     Esqueceu a senha?
                 </Button> */}
 
-                <Modal visible={modalVisible} transparent>
+                {/* <Modal visible={modalVisible} transparent>
                     <View style={styles.modalContainer}>
                         <View style={styles.modalContent}>
                             <Text>Informe seu e-mail para redefinir a senha</Text>
@@ -140,7 +143,7 @@ export default function LoginScreen({ navigation }: any) {
                             </Button>
                         </View>
                     </View>
-                </Modal>
+                </Modal> */}
             </ScrollView>
         </KeyboardAvoidingView>
     );

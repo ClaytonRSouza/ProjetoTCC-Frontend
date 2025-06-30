@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
 import { Button, Text, TextInput } from 'react-native-paper';
 import CustomAppBar from '../components/CustomAppBar';
+import { propriedadeSchema } from '../schemas/userSchema';
 import { api } from '../services/api';
 
 export default function CadastrarPropriedadeScreen() {
@@ -11,8 +12,11 @@ export default function CadastrarPropriedadeScreen() {
     const navigation = useNavigation<any>();
 
     const handleCadastrar = async () => {
-        if (!nome.trim()) {
-            Alert.alert('Erro', 'Informe o nome da propriedade.');
+        const parse = propriedadeSchema.safeParse({ nome });
+
+        if (!parse.success) {
+            const msg = parse.error.issues.map(issue => issue.message).join('\n');
+            Alert.alert('Erro', msg);
             return;
         }
 
@@ -28,6 +32,7 @@ export default function CadastrarPropriedadeScreen() {
             setLoading(false);
         }
     };
+
 
     return (
         <View style={styles.container}>
