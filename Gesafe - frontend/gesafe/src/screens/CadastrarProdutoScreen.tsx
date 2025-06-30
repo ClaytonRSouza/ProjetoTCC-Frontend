@@ -61,24 +61,47 @@ export default function CadastrarProdutoScreen({ navigation }: CadastrarProdutoS
   const handleValidadeInput = (text: string) => {
     const digits = text.replace(/[^\d]/g, '');
 
+    // Se o usuário está apagando (menos dígitos que antes), não forçamos formatação
+    if (digits.length < validade.replace(/[^\d]/g, '').length) {
+      setValidade(text);
+      return;
+    }
+
     // MMYYYY → converte para último dia do mês
     if (/^\d{6}$/.test(digits)) {
       const mes = parseInt(digits.substring(0, 2));
       const ano = parseInt(digits.substring(2));
-      const diaFinal = getLastDayOfMonth(mes, ano);
-      setValidade(`${String(diaFinal).padStart(2, '0')}/${String(mes).padStart(2, '0')}/${ano}`);
+
+      // valida mês e ano antes de aplicar
+      if (mes >= 1 && mes <= 12 && ano >= 1000 && ano <= 9999) {
+        const diaFinal = getLastDayOfMonth(mes, ano);
+        setValidade(`${String(diaFinal).padStart(2, '0')}/${String(mes).padStart(2, '0')}/${ano}`);
+        return;
+      }
     }
 
     // DDMMYYYY → formatado
-    else if (/^\d{8}$/.test(digits)) {
+    if (/^\d{8}$/.test(digits)) {
       const dia = digits.substring(0, 2);
       const mes = digits.substring(2, 4);
       const ano = digits.substring(4);
-      setValidade(`${dia}/${mes}/${ano}`);
-    } else {
-      setValidade(text);
+
+      if (
+        parseInt(dia) >= 1 &&
+        parseInt(dia) <= 31 &&
+        parseInt(mes) >= 1 &&
+        parseInt(mes) <= 12 &&
+        parseInt(ano) >= 1000
+      ) {
+        setValidade(`${dia}/${mes}/${ano}`);
+        return;
+      }
     }
+
+    // padrão: mantém conforme digitado
+    setValidade(text);
   };
+
 
   const handleCadastrar = async () => {
     if (

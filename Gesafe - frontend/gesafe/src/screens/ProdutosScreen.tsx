@@ -28,6 +28,46 @@ interface Propriedade {
   nome: string;
 }
 
+function getLastDayOfMonth(month: number, year: number): number {
+  if ([4, 6, 9, 11].includes(month)) return 30;
+  if (month === 2) return ((year % 4 === 0 && year % 100 !== 0) || year % 400 === 0) ? 29 : 28;
+  return 31;
+}
+
+function formatarValidadeInput(text: string, valorAtual: string): string {
+  const digits = text.replace(/[^\d]/g, '');
+
+  // Se o usuário está apagando (menos dígitos que antes)
+  if (digits.length < valorAtual.replace(/[^\d]/g, '').length) return text;
+
+  if (/^\d{6}$/.test(digits)) {
+    const mes = parseInt(digits.substring(0, 2));
+    const ano = parseInt(digits.substring(2));
+    if (mes >= 1 && mes <= 12 && ano >= 1000 && ano <= 9999) {
+      const diaFinal = getLastDayOfMonth(mes, ano);
+      return `${String(diaFinal).padStart(2, '0')}/${String(mes).padStart(2, '0')}/${ano}`;
+    }
+  }
+
+  if (/^\d{8}$/.test(digits)) {
+    const dia = digits.substring(0, 2);
+    const mes = digits.substring(2, 4);
+    const ano = digits.substring(4);
+    if (
+      parseInt(dia) >= 1 &&
+      parseInt(dia) <= 31 &&
+      parseInt(mes) >= 1 &&
+      parseInt(mes) <= 12 &&
+      parseInt(ano) >= 1000
+    ) {
+      return `${dia}/${mes}/${ano}`;
+    }
+  }
+
+  return text;
+}
+
+
 export default function ProdutosScreen() {
   const { token } = useAuth();
   const navigation = useNavigation<any>();
@@ -82,20 +122,6 @@ export default function ProdutosScreen() {
       console.error('Erro ao atualizar produtos:', err);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const realizarSaida = async (produto: Produto) => {
-    try {
-      await api.post('/produto/saida', {
-        produtoId: produto.idProduto,
-        propriedadeId: propriedadeSelecionada?.id,
-        quantidade: 1
-      });
-      Alert.alert('Sucesso', 'Saída registrada!');
-      atualizarProdutos();
-    } catch (err: any) {
-      Alert.alert('Erro', err.response?.data?.error || 'Erro ao registrar saída');
     }
   };
 
@@ -285,20 +311,8 @@ export default function ProdutosScreen() {
               keyboardType="numeric"
               value={editValidade}
               onChangeText={(text) => {
-                const digits = text.replace(/[^\d]/g, '');
-                if (/^\d{6}$/.test(digits)) {
-                  const mes = parseInt(digits.substring(0, 2));
-                  const ano = parseInt(digits.substring(2));
-                  const lastDay = new Date(ano, mes, 0).getDate();
-                  setEditValidade(`${String(lastDay).padStart(2, '0')}/${String(mes).padStart(2, '0')}/${ano}`);
-                } else if (/^\d{8}$/.test(digits)) {
-                  const dia = digits.substring(0, 2);
-                  const mes = digits.substring(2, 4);
-                  const ano = digits.substring(4);
-                  setEditValidade(`${dia}/${mes}/${ano}`);
-                } else {
-                  setEditValidade(text);
-                }
+                const formatado = formatarValidadeInput(text, editValidade);
+                setEditValidade(formatado);
               }}
               style={styles.modalInput}
             />
@@ -480,7 +494,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 6,
     marginTop: 6,
-    maxHeight: 200, // 👈 limita a altura visível
+    maxHeight: 200,
     zIndex: 999,
   },
 
